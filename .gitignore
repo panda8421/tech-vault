@@ -1,0 +1,18 @@
+# 缓存目录
+.trae-html-share-packages/
+
+# 图片素材（站点以代码方式呈现，素材不入库）
+科普图片/*.jpg
+科普图片/*.png
+科普图片/*.jpeg
+科普图片/*.gif
+科普图片/*.webp
+科普图片/*.bmp
+
+# 压缩包
+*.zip
+*.rar
+
+# IDE / 系统
+Thumbs.db
+.DS_Store

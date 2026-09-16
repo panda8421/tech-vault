@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GNSS到MCU-PPS授时原理示意图</title>
+<style>
+  :root{
+    color-scheme:light;
+    --surface:#F7F7F8; --surface-muted:#EFEFF2;
+    --text:#171717; --text-muted:#52525B; --border:rgba(23,23,23,0.12);
+    --brand:#4B3FE3; --brand-soft:#F2F7FF; --brand-text:#1A1759;
+    --chart-series-1:#3C2ECA; --chart-series-2:#A9AEFF;
+    --radius:8px; --radius-card:12px;
+    --font-sans:"SF Pro Text","PingFang SC",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --weight-regular:400; --weight-medium:500; --weight-strong:600;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      color-scheme:dark;
+      --surface:#171717; --surface-muted:#262626;
+      --text:#E5E5E5; --text-muted:#A1A1AA; --border:rgba(229,229,229,0.12);
+      --brand:#6054F1; --brand-soft:#1A1759; --brand-text:#CFD8FF;
+      --chart-series-1:#4B3FE3; --chart-series-2:#A9AEFF;
+    }
+  }
+  body{margin:0;background:var(--surface);color:var(--text);font:var(--weight-regular) 14px/20px var(--font-sans);}
+  .wrap{max-width:820px;margin:0 auto;padding:24px;}
+  .t{fill:var(--text);font:var(--weight-regular) 14px/20px var(--font-sans);}
+  .th{fill:var(--text);font:var(--weight-medium) 14px/20px var(--font-sans);}
+  .ts{fill:var(--text-muted);font:var(--weight-regular) 12px/18px var(--font-sans);}
+  .brand{fill:var(--brand);font:var(--weight-strong) 14px/20px var(--font-sans);}
+  .code{fill:var(--text);font:var(--weight-medium) 13px/20px var(--font-mono);}
+  .arr{stroke:var(--text-muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+  .capsule{fill:var(--surface-muted);stroke:var(--border);}
+  .hl{fill:var(--surface);stroke:var(--brand);stroke-width:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg viewBox="0 0 720 520" width="100%" height="auto" role="img" aria-label="GNSS 通过串口与 PPS 引脚向 MCU 授时示意图">
+  <defs>
+    <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M1 1 L7 4 L1 7 Z" fill="var(--text-muted)"></path>
+    </marker>
+  </defs>
+
+  <text x="360" y="40" text-anchor="middle" class="th">GNSS → MCU 高精度授时原理</text>
+
+  <g>
+    <rect x="48" y="96" width="216" height="216" rx="12" class="capsule"></rect>
+    <text x="156" y="122" text-anchor="middle" class="th">GNSS 接收机 (UM960)</text>
+    <circle cx="72" cy="150" r="3" fill="var(--brand)"></circle>
+    <text x="86" y="154" class="t">串口 UART TX</text>
+    <text x="86" y="172" class="ts">发送 NMEA 报文</text>
+    <circle cx="72" cy="246" r="3" fill="var(--brand)"></circle>
+    <text x="86" y="250" class="t">PPS 引脚</text>
+    <text x="86" y="268" class="ts">秒脉冲输出</text>
+  </g>
+
+  <g>
+    <rect x="456" y="96" width="216" height="216" rx="12" class="capsule"></rect>
+    <text x="564" y="122" text-anchor="middle" class="th">MCU</text>
+    <circle cx="480" cy="150" r="3" fill="var(--brand)"></circle>
+    <text x="494" y="154" class="t">UART RX 收报文</text>
+    <text x="494" y="172" class="ts">解析 UTC 时间</text>
+    <circle cx="480" cy="246" r="3" fill="var(--brand)"></circle>
+    <text x="494" y="250" class="t">外部中断 EXTI</text>
+    <text x="494" y="268" class="ts">捕获整秒边沿</text>
+  </g>
+
+  <line x1="264" y1="150" x2="448" y2="150" class="arr" marker-end="url(#ah)"></line>
+  <g>
+    <rect x="286" y="108" width="148" height="40" rx="8" class="capsule"></rect>
+    <text x="360" y="126" text-anchor="middle" class="th">① 串口 · NMEA 报文</text>
+    <text x="360" y="142" text-anchor="middle" class="ts">含 UTC 时间 (时:分:秒)</text>
+  </g>
+
+  <line x1="264" y1="246" x2="448" y2="246" class="arr" marker-end="url(#ah)"></line>
+  <text x="360" y="236" text-anchor="middle" class="ts">每个整秒触发一次中断</text>
+  <g>
+    <rect x="292" y="258" width="136" height="40" rx="8" class="capsule"></rect>
+    <text x="360" y="276" text-anchor="middle" class="th">② PPS 秒脉冲</text>
+    <text x="360" y="292" text-anchor="middle" class="ts">整秒边沿 (1Hz)</text>
+  </g>
+
+  <g>
+    <rect x="48" y="330" width="624" height="148" rx="12" class="hl"></rect>
+    <text x="72" y="360" class="th" style="fill:var(--brand)">③ 合成 → 纳秒级本地时间</text>
+    <text x="150" y="400" text-anchor="middle" class="code">NMEA 时间</text>
+    <text x="150" y="418" text-anchor="middle" class="ts">(知道是哪一秒)</text>
+    <text x="255" y="412" text-anchor="middle" class="ts">＋</text>
+    <text x="360" y="400" text-anchor="middle" class="code">PPS 精确边沿</text>
+    <text x="360" y="418" text-anchor="middle" class="ts">(精确到哪一瞬)</text>
+    <text x="465" y="412" text-anchor="middle" class="ts">＝</text>
+    <text x="570" y="400" text-anchor="middle" class="brand">纳秒级时间</text>
+    <text x="570" y="420" text-anchor="middle" class="ts">本地高精度节拍</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

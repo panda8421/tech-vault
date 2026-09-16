@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GNSS 的 PPS 引脚是什么？| 科普</title>
+<style>
+  :root{
+    --bg:#0b0e17; --surface:#141926; --surface-2:#1b2233;
+    --line:rgba(255,255,255,0.10); --text:#e8ecf4; --muted:#9aa5bd;
+    --brand:#6f6fff; --brand-2:#22a5f7; --accent:#27d2bf;
+    --font:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono","SF Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(111,111,255,0.16), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(34,165,247,0.12), transparent 55%),
+    var(--bg);
+    color:var(--text);font-family:var(--font);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+
+  /* 头部 */
+  header{text-align:center;padding:24px 0 8px;}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;border:1px solid rgba(39,210,191,.4);padding:4px 14px;border-radius:999px;margin-bottom:18px;}
+  h1{font-size:clamp(26px,4.4vw,40px);line-height:1.2;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:16px;margin:0;}
+
+  /* 区块 */
+  section{margin-top:56px;}
+  .section-title{display:flex;align-items:baseline;gap:12px;margin:0 0 18px;}
+  .section-index{font:600 14px var(--mono);color:var(--brand-2);}
+  .section-title h2{font-size:22px;margin:0;font-weight:650;}
+
+  /* 卡片区 */
+  .grid{display:grid;gap:16px;}
+  .g-2{grid-template-columns:repeat(2,1fr);}
+  .g-3{grid-template-columns:repeat(3,1fr);}
+  @media(max-width:720px){.g-2,.g-3{grid-template-columns:1fr;}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;}
+  .card h3{margin:0 0 8px;font-size:17px;}
+  .card p{margin:0;color:var(--muted);font-size:15px;}
+
+  /* 关键卡片高亮 */
+  .card.hot{border-color:rgba(111,111,255,.55);background:linear-gradient(180deg,rgba(111,111,255,.10),var(--surface));}
+  .card.hot h3{color:#aab4ff;}
+  mark{background:none;color:var(--brand-2);font-weight:600;}
+
+  /* 超精致示意图容器 */
+  .figure-frame{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .figure-frame svg{display:block;width:100%;height:auto;}
+  .cap{color:var(--muted);font-size:14px;text-align:center;margin-top:14px;}
+  .cap code,.inline-code{font-family:var(--mono);background:rgba(255,255,255,.08);padding:1px 7px;border-radius:6px;font-size:.9em;color:#cdd6e8;}
+
+  /* 图片卡片 */
+  .img-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .img-card img{display:block;width:100%;height:auto;background:#fff;}
+  .img-card .cap{padding:14px 16px;margin:0;text-align:left;border-top:1px solid var(--line);font-size:14px;}
+
+  /* 科普要点 bullet */
+  .points{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:12px;}
+  .points li{display:flex;gap:12px;color:var(--text);font-size:15px;}
+
+  /* 常见疑问 FAQ */
+  .faq{display:grid;gap:14px;margin-top:22px;}
+  .faq-item{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .faq-item .q{font-size:16px;font-weight:650;color:var(--brand-2);margin:0 0 8px;}
+  .faq-item .a{color:var(--text);font-size:15px;margin:0;}
+  .faq-item .a b{color:var(--text);}
+  .faq-item .clarify{display:block;margin-top:10px;color:var(--muted);font-size:14px;}
+  .faq-item code{font-family:var(--mono);background:rgba(255,255,255,.08);padding:1px 7px;border-radius:6px;font-size:.9em;color:#cdd6e8;}
+  .faq-fig{margin-top:14px;border-top:1px solid var(--line);padding:14px 0 2px;}
+  .faq-fig .fig-lab{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 10px;}
+  .faq-fig svg{display:block;width:100%;height:auto;}
+  .points .dot{flex:0 0 20px;height:20px;border-radius:6px;background:rgba(111,111,255,.18);color:var(--brand-2);font:600 12px/20px var(--mono);text-align:center;}
+
+  footer{margin-top:64px;border-top:1px solid var(--line);padding-top:24px;color:var(--muted);font-size:14px;text-align:center;}
+
+  /* 下集预告 · 悬念钩子 */
+  .teaser{position:relative;margin-top:56px;padding:44px 28px 40px;border:1px solid rgba(111,111,255,.4);
+    border-radius:20px;background:radial-gradient(620px 320px at 50% 0%, rgba(111,111,255,.18), transparent 65%), var(--surface);
+    text-align:center;overflow:hidden;}
+  .teaser::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 40%,rgba(39,210,191,.08) 50%,transparent 60%);
+    background-size:250% 100%;animation:teaserGlint 4s linear infinite;}
+  @keyframes teaserGlint{0%{background-position:0% 0;}100%{background-position:250% 0;}}
+  .teaser .next-tag{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--mono);letter-spacing:.22em;
+    color:var(--brand-2);border:1px solid rgba(34,165,247,.5);background:rgba(34,165,247,.08);
+    padding:5px 14px;border-radius:999px;margin-bottom:20px;}
+  .teaser .next-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--brand-2);animation:blink 1.2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:.25;}50%{opacity:1;}}
+  .teaser h3{font-size:26px;margin:0 0 8px;font-weight:700;}
+  .teaser .hook-q{color:var(--muted);font-size:16px;margin:0 auto 26px;max-width:560px;}
+  .teaser .hook-q b{color:#cdd6e8;}
+  .teaser .faq-links{margin:30px auto 0;max-width:580px;text-align:left;}
+  .teaser .faq-links ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+  .teaser .faq-links li{display:flex;gap:10px;align-items:flex-start;
+    background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:15px;}
+  .teaser .faq-links li::before{content:"?";flex:none;width:22px;height:22px;line-height:22px;text-align:center;border-radius:6px;
+    background:rgba(111,111,255,.2);color:#aab4ff;font-weight:700;font-size:14px;}
+  .teaser .divider{margin:34px auto 0;width:320px;height:1px;background:linear-gradient(90deg,transparent,var(--brand),transparent);border:none;}
+  .teaser .tease-cap{color:#aab4ff;font-size:17px;margin:22px auto 0;}
+  .teaser .tease-cap span{display:inline-block;animation:bob 1.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:15px;}
+  th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);}
+  thead th{background:var(--surface-2);color:var(--text);font-weight:600;}
+  tr:last-child td{border-bottom:none;}
+  td code,th code{font-family:var(--mono);color:#cdd6e8;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">GNSS 知识科普</span>
+    <h1>GNSS 上的 PPS 引脚是干什么的？</h1>
+    <p class="sub">一个每秒响一次、精度达纳秒级的"高精度节拍器"</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>一句话理解 PPS</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>PPS = Pulse Per Second，秒脉冲</h3>
+        <p>GNSS 接收机在解算出卫星时间后，会<mark>每秒输出一个脉冲</mark>，脉冲边沿被校准到 GPS/北斗的<b>整秒时刻</b>，误差仅为<mark>几十到几百纳秒</mark>。它用来对外提供一个精确到纳秒级的时间基准。</p>
+      </div>
+      <div class="card">
+        <h3>三个典型用途</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>时间同步/校时</b>：MCU 捕获 PPS 边沿对齐本地时钟。</span></li>
+          <li><span class="dot">2</span><span><b>授时打标</b>：数据打上"第 N 秒"，多设备微秒级同步。</span></li>
+          <li><span class="dot">3</span><span><b>边沿触发</b>：让某段逻辑动作发生在整秒上。</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>系统怎么连接：GNSS → MCU</h2></div>
+    <div class="figure-frame">
+      <svg viewBox="0 0 720 520" width="100%" height="auto" role="img" aria-label="GNSS 通过串口与 PPS 引脚向 MCU 授时示意图">
+        <defs>
+          <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#9aa5bd"></path></marker>
+        </defs>
+        <text x="360" y="40" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:17px;font-family:var(--font)">GNSS → MCU 高精度授时原理</text>
+
+        <!-- GNSS box -->
+        <rect x="48" y="96" width="216" height="216" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="156" y="122" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:15px">GNSS 接收机 (UM960)</text>
+        <circle cx="72" cy="150" r="3" fill="#6f6fff"/>
+        <text x="86" y="154" style="fill:#e8ecf4;font-size:14px">串口 UART TX</text>
+        <text x="86" y="172" style="fill:#9aa5bd;font-size:13px">发送 NMEA 报文</text>
+        <circle cx="72" cy="246" r="3" fill="#6f6fff"/>
+        <text x="86" y="250" style="fill:#e8ecf4;font-size:14px">PPS 引脚</text>
+        <text x="86" y="268" style="fill:#9aa5bd;font-size:13px">秒脉冲输出</text>
+
+        <!-- MCU box -->
+        <rect x="456" y="96" width="216" height="216" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="564" y="122" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:15px">MCU</text>
+        <circle cx="480" cy="150" r="3" fill="#6f6fff"/>
+        <text x="494" y="154" style="fill:#e8ecf4;font-size:14px">UART RX 收报文</text>
+        <text x="494" y="172" style="fill:#9aa5bd;font-size:13px">解析 UTC 时间</text>
+        <circle cx="480" cy="246" r="3" fill="#6f6fff"/>
+        <text x="494" y="250" style="fill:#e8ecf4;font-size:14px">外部中断 EXTI</text>
+        <text x="494" y="268" style="fill:#9aa5bd;font-size:13px">捕获整秒边沿</text>
+
+        <!-- 串口通道 -->
+        <line x1="264" y1="150" x2="448" y2="150" stroke="#9aa5bd" stroke-width="1.5" marker-end="url(#ah)"/>
+        <rect x="286" y="108" width="148" height="40" rx="8" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="360" y="126" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">① 串口 · NMEA 报文</text>
+        <text x="360" y="142" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">含 UTC 时间 (时:分:秒)</text>
+
+        <!-- PPS 通道 -->
+        <line x1="264" y1="246" x2="448" y2="246" stroke="#27d2bf" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="360" y="236" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">每个整秒触发一次中断</text>
+        <rect x="292" y="258" width="136" height="40" rx="8" fill="#1b2233" stroke="rgba(39,210,191,.5)"/>
+        <text x="360" y="276" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">② PPS 秒脉冲</text>
+        <text x="360" y="292" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">整秒边沿 (1Hz)</text>
+
+        <!-- 合成结果 -->
+        <rect x="48" y="330" width="624" height="148" rx="12" fill="#141926" stroke="#6f6fff" stroke-width="1.5"/>
+        <text x="72" y="360" style="fill:#6f6fff;font-weight:600;font-size:15px">③ 合成 → 纳秒级本地时间</text>
+        <text x="150" y="400" text-anchor="middle" style="fill:#e8ecf4;font-family:monospace;font-size:14px">NMEA 时间</text>
+        <text x="150" y="418" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">(哪一秒)</text>
+        <text x="255" y="412" text-anchor="middle" style="fill:#9aa5bd;font-size:14px">＋</text>
+        <text x="360" y="400" text-anchor="middle" style="fill:#e8ecf4;font-family:monospace;font-size:14px">PPS 精确边沿</text>
+        <text x="360" y="418" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">(哪一瞬)</text>
+        <text x="465" y="412" text-anchor="middle" style="fill:#9aa5bd;font-size:14px">＝</text>
+        <text x="570" y="400" text-anchor="middle" style="fill:#27d2bf;font-weight:700;font-size:16px">纳秒级时间</text>
+        <text x="570" y="420" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">本地高精度节拍</text>
+      </svg>
+      <p class="cap">两条链路各司其职：<code>串口</code>告诉你<b>是哪一秒</b>，<code>PPS</code>告诉你<b>精确在哪一瞬</b>，两者对齐即得高精度时间。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>核心要点</h2></div>
+    <div class="grid g-3">
+      <div class="card"><h3>PPS 只给边沿</h3><p>它只保证"整秒边界精确"，<b>不告诉你"是哪一秒"</b>。具体秒值要靠 NMEA 报文里的 <code>$GPGGA</code>/<code>$GPRMC</code> 读取。</p></div>
+      <div class="card"><h3>接外部中断</h3><p>典型接法：PPS → MCU 的 <mark>EXTI 外部中断脚</mark>，上升沿进中断做校时，务必等首句有效定位后 PPS 才稳定。</p></div>
+      <div class="card"><h3>可调可扩展</h3><p>有的模块（如 u-blox）PPS 可配成<mark>固定频率的周期脉冲</mark>、甚至多路差分输出，用于更高要求的同步场景。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">04</span><h2>关键：怎么"破译" PPS 对应的是哪一秒</h2></div>
+    <div class="card">
+      <p>别忘了：<b>PPS 只告诉你"现在是整秒"，它不开口说话，不会告诉你"是哪一秒"</b>。那怎么知道每一声"当"到底对应几点几分几秒？<mark>把报幕员喊的秒数，贴到某一次响铃的瞬间上</mark>即可。</p>
+      <table style="margin-top:18px;">
+        <thead><tr><th>事件</th><th>你记下的东西</th></tr></thead>
+        <tbody>
+          <tr><td>PPS 响了一声（边沿触发中断）</td><td>记录本地时间戳 <code>ts₁</code></td></tr>
+          <tr><td>报幕员喊"现在是 12:34:56"（NMEA 报文）</td><td>拿到秒值 <code>56</code>（UTC 时:分:秒）</td></tr>
+          <tr><td>下一次 PPS 又响一声</td><td>记录 <code>ts₂</code>，此刻秒值应为 <code>57</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:18px 0 0;">于是：<code>12:34:56</code> 这一秒，正好是 <code>ts₁ → ts₂</code> 之间的这一秒。把"56"这个标签贴到第一次响铃的边沿上，之后每响一声你就知道"又精确定位了一秒"——纳秒级节拍就此建立。</p>
+    </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>一句话口诀</h3>
+        <p>NMEA 告诉你<b>是哪一秒</b>，PPS 告诉你<b>精确在哪一瞬</b>。两个都对上，时间才又准又知道数。</p>
+      </div>
+      <div class="card">
+        <h3>两个工程坑</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>错一帧/半秒</b>：有的模块 <code>$GPRMC</code> 报的时间和对上的 PPS 边沿差半秒或一帧，用前要实测校准偏移。</span></li>
+          <li><span class="dot">2</span><span><b>定位才算数</b>：冷启动未拿到卫星时间时铃不响或不稳，等首句有效定位后再开始"贴标签"。</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-item">
+        <h3 class="q">Q1 · PPS 先到、NMEA 晚到，怎么算？</h3>
+        <p class="a">关键在：<b>用到的是 NMEA 文本里写的秒值，不是它到达的那一瞬</b>。MCU 靠一个不停跳的本地计数器量"距 PPS 边沿过了多久"，把两者相加即可。
+        <code>当前时刻 = 边沿所指秒(如 12:34:56.000) + 本地计数器距离 = 12:34:56.150</code>
+        <span class="clarify">纳秒精度来自"距边沿时长"的精细计时，与报文何时到达无关。晚到 0.15s、甚至 2s，都不影响。</span></p>
+        <div class="faq-fig">
+          <p class="fig-lab">示意：PPS 边沿先到、报文晚到也能算</p>
+          <svg viewBox="0 0 720 416" width="100%" height="auto" role="img" aria-label="PPS 边沿先到、NMEA 报文晚到的对时算法示意">
+            <defs>
+              <marker id="fa1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#9aa5bd"></path></marker>
+            </defs>
+            <text x="360" y="26" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:16px;font-family:var(--font)">PPS 先触发、NMEA 晚到 —— 怎么算？</text>
+            <text x="330" y="58" text-anchor="middle" style="fill:#cdd6e8;font-family:var(--mono);font-size:13px">12:34:56.000</text>
+            <line x1="330" y1="70" x2="330" y2="120" stroke="#27d2bf" stroke-width="2.5"></line>
+            <circle cx="330" cy="66" r="3" fill="#27d2bf"></circle>
+            <line x1="70" y1="120" x2="646" y2="120" stroke="#9aa5bd" stroke-width="1" marker-end="url(#fa1)"></line>
+            <text x="636" y="136" text-anchor="end" style="fill:#9aa5bd;font-size:12px">时间 →</text>
+            <g>
+              <rect x="370" y="150" width="260" height="96" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+              <text x="382" y="172" style="fill:#cdd6e8;font-family:var(--mono);font-size:13px">$GPRMC,123456.00,…</text>
+              <text x="382" y="194" style="fill:#e8ecf4;font-size:14px">NMEA 报文此刻才到 MCU</text>
+              <text x="382" y="212" style="fill:#9aa5bd;font-size:13px">比第 56 秒的 PPS 边沿晚到</text>
+            </g>
+            <path d="M 376 150 L 334 122" stroke="#9aa5bd" stroke-width="1" stroke-dasharray="4 4" fill="none"/>
+            <text x="352" y="142" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">标定：这个边沿＝第56秒</text>
+            <g>
+              <rect x="50" y="274" width="620" height="124" rx="12" fill="#141926" stroke="#6f6fff" stroke-width="1.5"/>
+              <text x="66" y="300" style="fill:#6f6fff;font-weight:600;font-size:15px">③ 怎么算当前时刻（报文晚到也没关系）</text>
+              <text x="360" y="334" text-anchor="middle" style="fill:#e8ecf4;font-size:14px">当前时刻 ＝ 边沿所指的秒 ＋ 距该边沿又走了多久</text>
+              <text x="360" y="366" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-family:var(--mono);font-size:15px">12:34:56.000 ＋ 0.150s ＝ 12:34:56.150</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h3 class="q">Q2 · 会不会存在 NMEA 先到、PPS 后到？</h3>
+        <p class="a">物理上<b>不可能存在"报文本体先到、它对应的边沿后到"</b>。因为报文是在整秒（边沿之后）才生成的，再加传输必然更晚。
+        <span class="clarify">如果你"先收到报文、才看到某个边沿"，那看到的那个边沿只能是<b>下一个边沿 B(57.000)</b>——它本来就不属于这条 56 报文。真正要关注的是"文本秒值指向哪一根边沿"，而不是先后顺序。</span></p>
+        <div class="faq-fig">
+          <p class="fig-lab">示意：对应边沿必然先到，报文晚到（真实只有这一种顺序）</p>
+          <svg viewBox="0 0 720 396" width="100%" height="auto" role="img" aria-label="PPS 对应边沿必然先到、报文晚到的真实时序">
+            <text x="360" y="24" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:15px;font-family:var(--font)">真实时序：边沿 A（56.000）先到，报文晚到</text>
+
+            <text x="150" y="86" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:13px">A 边沿 · 56.000</text>
+            <line x1="150" y1="98" x2="150" y2="150" stroke="#27d2bf" stroke-width="2.5">
+              <animate attributeName="stroke-opacity" values="0.25;1;1;0.25;0.25" keyTimes="0;0.06;0.1;0.16;1" dur="3s" repeatCount="indefinite"/>
+            </line>
+            <circle cx="150" cy="92" r="3.5" fill="#27d2bf">
+              <animate attributeName="r" values="3.5;6;3.5" keyTimes="0;0.08;0.16" dur="3s" repeatCount="indefinite"/>
+            </circle>
+
+            <text x="150" y="180" text-anchor="middle" style="fill:#9aa5bd">t=0 先到 · 记下 tick</text>
+
+            <line x1="70" y1="150" x2="650" y2="150" stroke="#9aa5bd" stroke-width="1"></line>
+            <text x="640" y="170" text-anchor="end" style="fill:#9aa5bd">时间 →</text>
+
+            <rect x="150" y="150" width="470" height="12" rx="6" fill="#27d2bf" fill-opacity="0.22">
+              <animate attributeName="width" values="0;470;470" keyTimes="0;0.3;1" dur="3s" repeatCount="indefinite"/>
+            </rect>
+            <text x="385" y="196" text-anchor="middle" style="fill:#9aa5bd">第 56 秒区间（RTC=56）</text>
+
+            <!-- 报文到达（滑入） -->
+            <g>
+              <animateTransform attributeName="transform" type="translate" values="140 0;0 0;0 0" keyTimes="0;0.3;1" dur="3s" repeatCount="indefinite"/>
+              <rect x="360" y="206" width="240" height="52" rx="10" fill="#141926" stroke="#ffffff1a"/>
+              <text x="480" y="226" text-anchor="middle" style="fill:#cdd6e8;font-family:var(--mono)">报文到达 · 文本 UTC=56</text>
+              <text x="480" y="246" text-anchor="middle" style="fill:#9aa5bd">t=0.8s · 必然晚于 A</text>
+            </g>
+
+            <!-- 对应：报文 → A -->
+            <path d="M 360 232 C 300 236 250 220 158 156" stroke="#1DC981" stroke-width="2" fill="none" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0">
+              <animate attributeName="stroke-dashoffset" values="100;0;0;100" keyTimes="0;0.45;0.9;1" dur="3s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.45;0.9;1" dur="3s" repeatCount="indefinite"/>
+            </path>
+            <text x="240" y="262" text-anchor="middle" style="fill:#1DC981;font-weight:600">对应 A（早已到达）</text>
+
+            <!-- 不存在标记 -->
+            <text x="600" y="300" text-anchor="middle" style="fill:#E8463A">✗ 不存在：报文先到、对应边沿后到</text>
+
+            <!-- 底部结论 -->
+            <g>
+              <rect x="50" y="320" width="620" height="76" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.5"/>
+              <text x="66" y="344" style="fill:#6f6fff;font-weight:600">结论：</text>
+              <text x="132" y="344" style="fill:#e8ecf4">边沿先到是必然；若"先见报文后见边沿"，那是下一个 B(57)，不属于此报文</text>
+              <text x="360" y="372" text-anchor="middle" style="fill:#9aa5bd">真正要关注：文本秒值指向哪根边沿，而非先后顺序</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h3 class="q">Q3 · 报文晚到 0.8s，会不会错配到下一秒的边沿？</h3>
+        <p class="a">只有用"<b>最近的边沿</b>"这种省事判据才会错配到下一秒的边沿 B。正确判据是"<b>文本写死的秒值 → 该秒所属区间的开头边沿</b>"：<span class="clarify">报文文本 = 56 → 属于第 56 秒 → 开头边沿 = 56.000。B 是 57 秒的开头，归下一条"文本=57"的报文，不会串位。</span></p>
+        <div class="faq-fig">
+          <p class="fig-lab">示意：正确判据（文本秒值→开头边沿） vs 错误判据（最近边沿）</p>
+          <svg viewBox="0 0 720 356" width="100%" height="auto" role="img" aria-label="晚到 0.8 秒时，正确与错误的边沿归属判据对比">
+            <defs>
+              <marker id="ok1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#1DC981"></path></marker>
+              <marker id="bad1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#E8463A"></path></marker>
+            </defs>
+            <text x="360" y="22" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:15px;font-family:var(--font)">晚到 0.8s：正确归 A，错误才归 B</text>
+            <text x="118" y="96" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:13px">A · 56.000</text>
+            <text x="560" y="96" text-anchor="middle" style="fill:#9aa5bd;font-size:13px">B · 57.000</text>
+            <line x1="118" y1="108" x2="118" y2="136" stroke="#27d2bf" stroke-width="2.5">
+              <animate attributeName="stroke-opacity" values="0.25;1;1;0.25;0.25" keyTimes="0;0.05;0.09;0.15;1" dur="4s" repeatCount="indefinite"/>
+            </line>
+            <circle cx="118" cy="102" r="3.5" fill="#27d2bf">
+              <animate attributeName="r" values="3.5;6;3.5" keyTimes="0;0.07;0.15" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <line x1="560" y1="108" x2="560" y2="136" stroke="#9aa5bd" stroke-width="1.5"></line>
+            <line x1="70" y1="136" x2="650" y2="136" stroke="#9aa5bd" stroke-width="1"></line>
+            <text x="645" y="152" text-anchor="end" style="fill:#9aa5bd">时间 →</text>
+            <rect x="118" y="140" width="442" height="10" rx="5" fill="#27d2bf" fill-opacity="0.22">
+              <animate attributeName="width" values="0;442;442" keyTimes="0;0.25;1" dur="4s" repeatCount="indefinite"/>
+            </rect>
+            <text x="339" y="166" text-anchor="middle" style="fill:#9aa5bd">第56秒区间（RTC=56）</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" values="140 0;0 0;0 0" keyTimes="0;0.25;1" dur="4s" repeatCount="indefinite"/>
+              <rect x="300" y="176" width="232" height="44" rx="8" fill="#141926" stroke="#ffffff1a"/>
+              <text x="416" y="193" text-anchor="middle" style="fill:#cdd6e8;font-family:var(--mono)">报文此刻到 · 文本 UTC=56</text>
+              <text x="416" y="212" text-anchor="middle" style="fill:#9aa5bd">到达时刻 56.800（t=0.8s）</text>
+            </g>
+            <path d="M 304 196 C 240 214 200 188 130 136" stroke="#1DC981" stroke-width="2" fill="none" marker-end="url(#ok1)" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">
+              <animate attributeName="stroke-dashoffset" values="100;0;0;100;100" keyTimes="0;0.3;0.6;0.85;1" dur="4s" repeatCount="indefinite"/>
+            </path>
+            <text x="196" y="228" text-anchor="middle" style="fill:#1DC981;font-size:12px;font-weight:600">正确：56 文本 → A<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.3;0.6;0.72" dur="4s" repeatCount="indefinite"/></text>
+            <path d="M 528 196 C 560 232 542 268 556 138" stroke="#E8463A" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#bad1)">
+              <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.6;0.72;0.85;1" dur="4s" repeatCount="indefinite"/>
+            </path>
+            <text x="470" y="270" text-anchor="middle" style="fill:#E8463A">错误：若按"最近边沿"→ B<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.6;0.72;0.85;1" dur="4s" repeatCount="indefinite"/></text>
+            <g>
+              <rect x="50" y="300" width="620" height="52" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.5"/>
+              <text x="66" y="330" style="fill:#6f6fff;font-weight:600">结论：</text>
+              <text x="132" y="330" style="fill:#e8ecf4">判据 = 文本秒值 → 所属整秒的开头边沿，绝不用"最近的边沿"</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h3 class="q">Q4 · 那个"前提"到底是不是"PPS 必须早于报文"？</h3>
+        <p class="a"><b>不是。</b>真正的关系是：<b>对应边沿(这一秒的开头)必然早于报文本体</b>，因为报文在它区间的开头边沿之后才生成——这是自动成立、无需假设的结论。<span class="clarify">若你发现模块存在固定半秒/一帧的相位差，那是厂商定义的固定偏移，只需<mark>联调时实测一次、写死常数</mark>，与"先后顺序"无关。</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">05</span><h2>不是所有 GNSS 模块都有 PPS</h2></div>
+    <div class="card">
+      <p>取决于<b>定位精度等级、封装和功能定位</b>。放心，这类是"高精度/授时型"必备：<code>UM960</code>、<code>NEO-M8N/M9N</code>、<code>F9P</code>、<code>AT6558</code> 等都有。判断方法是在手册引脚表里找 <code>PPS</code>/<code>1PPS</code>/<code>TIMEPULSE</code>/<code>PULSE</code> 字样。</p>
+      <table style="margin-top:20px;">
+        <thead><tr><th>关键词</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>PPS</code> / <code>1PPS</code></td><td>秒脉冲</td></tr>
+          <tr><td><code>TIMEPULSE</code> / <code>TIME PULSE</code></td><td>u-blox 风格的授时脉冲</td></tr>
+          <tr><td><code>PULSE</code> / <code>TIME_SYNC</code></td><td>其它厂商授时脚</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">06</span><h2>资料图集</h2></div>
+    <div class="grid g-3">
+      <div class="img-card">
+        <img src="GNSS芯片UM960-PPS引脚高亮图-暗色科技风.jpg" alt="GNSS 芯片 UM960 PPS 引脚高亮图">
+        <div class="cap">UM960 芯片 · PPS 引脚高亮（光效标记）</div>
+      </div>
+      <div class="img-card">
+        <img src="GNSS模块原理图.png" alt="GNSS 模块原理图">
+        <div class="cap">GNSS 模块原理图</div>
+      </div>
+      <div class="img-card">
+        <img src="官方文档对PPS引脚的说明.png" alt="官方文档对 PPS 引脚的说明">
+        <div class="cap">官方文档对 PPS 引脚的说明（UM960 · 行3）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+  <div class="section-title"><span class="section-index">07</span><h2>下一集预告：PPS 边沿跳一下，凭什么就是整秒？</h2></div>
+
+  <div class="teaser">
+    <span class="next-tag"><span class="dot"></span>NEXT EPISODE</span>
+    <h3>它就是跳了一下，怎么就这么"准"？</h3>
+    <p class="hook-q">前面我们看懂了 <b>怎么用 PPS 边沿去对齐、去算</b>。但这里埋着一个更大的谜：<br><b>GNSS 模块没联网、也没插线，它凭什么知道"现在这一秒"结束了？</b></p>
+
+    <svg viewBox="0 0 640 250" width="100%" height="auto" role="img" aria-label="PPS 脉冲跳动的悬念动画">
+      <!-- 坐标格线 -->
+      <g stroke="rgba(255,255,255,0.06)" stroke-width="1">
+        <line x1="40" y1="40" x2="40" y2="200"/><line x1="155" y1="40" x2="155" y2="200"/>
+        <line x1="270" y1="40" x2="270" y2="200"/><line x1="385" y1="40" x2="385" y2="200"/>
+        <line x1="500" y1="40" x2="500" y2="200"/><line x1="600" y1="40" x2="600" y2="200"/>
+      </g>
+      <!-- 基线 -->
+      <line x1="40" y1="200" x2="600" y2="200" stroke="#3a4360" stroke-width="2"/>
+      <!-- PPS 脉冲波形（整串轻微横向微颤，营造"信号在走"的跳动感） -->
+      <g>
+        <animateTransform attributeName="transform" type="translate" values="0 0;-3 0;0 0;3 0;0 0" dur="0.5s" repeatCount="indefinite"/>
+        <path d="M40 200 L40 70 L75 70 L75 200 L110 200 L110 70 L145 70 L145 200 L180 200 L180 70 L215 70 L215 200 L250 200 L250 70 L285 70 L285 200 L320 200 L320 70 L355 70 L355 200 L390 200 L390 70 L425 70 L425 200 L460 200 L460 70 L495 70 L495 200 L530 200 L530 70 L565 70 L565 200 L600 200"
+          fill="none" stroke="#27d2bf" stroke-width="3" stroke-linejoin="miter">
+          <animate attributeName="stroke-opacity" values="1;0.75;1" dur="0.5s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      <!-- 正在高亮的当前边沿：光晕 + 白点 -->
+      <g>
+        <circle cx="40" cy="70" r="14" fill="none" stroke="#6f6fff" stroke-width="2" opacity="0">
+          <animate attributeName="opacity" values="0;0.9;0" dur="2.4s" repeatCount="indefinite" keyTimes="0;0.25;0.5"/>
+          <animate attributeName="r" values="8;20;8" dur="2.4s" repeatCount="indefinite" keyTimes="0;0.25;0.5"/>
+        </circle>
+        <circle cx="40" cy="70" r="5" fill="#ffffff">
+          <animate attributeName="cx" values="40;110;180;250;320;390;460;530;40" dur="2.4s" repeatCount="indefinite" keyTimes="0;0.0625;0.125;0.1875;0.25;0.3125;0.375;0.4375;1"/>
+          <animate attributeName="r" values="5;3;5" dur="0.3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <!-- 大问号：呼吸放大，制造悬念 -->
+      <g transform="translate(555,120)">
+        <g>
+          <animateTransform attributeName="transform" type="scale" values="1 1;1.18 1.18;1 1" dur="2.4s" repeatCount="indefinite"/>
+          <text x="0" y="0" text-anchor="middle" dominant-baseline="central" style="fill:#aab4ff;font-weight:800;font-family:var(--font);font-size:64px">
+            <animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" repeatCount="indefinite"/>
+            ？
+          </text>
+        </g>
+      </g>
+      <!-- 悬在波形下方的文字 -->
+      <text x="320" y="236" text-anchor="middle" style="fill:#9aa5bd;font-size:13px">它没联网、没插线…… 到底凭什么？<animate attributeName="opacity" values="0.4;0.9;0.4" dur="3s" repeatCount="indefinite"/></text>
+    </svg>
+
+    <div class="faq-links">
+      <ul>
+        <li>GNSS 模块怎么知道"这一秒"什么时候开始、什么时候结束，还准到几十纳秒？</li>
+        <li>如果只看 PPS，它根本没有"时间信息"——那"是哪一秒"到底从哪来的？</li>
+        <li>卫星到底在帮它做什么，让这个普普通通的电平跳变变成"时间锚点"？</li>
+      </ul>
+    </div>
+
+    <hr class="divider">
+    <p class="tease-cap"><span>▲</span> 下一集，揭开 GNSS 模块内部是怎么"造出"这一个 PPS 的 <span>▲</span></p>
+  </div>
+  </section>
+
+  <footer>GNSS · PPS 科普内容 · 下集预告确认了这套"边沿 = 时间锚点"，关注后续揭晓 PPS 生成的秘密</footer>
+
+</div>
+</body>
+</html>
