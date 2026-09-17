@@ -110,6 +110,19 @@
   thead th{background:var(--surface-2);color:var(--text);font-weight:600;}
   tr:last-child td{border-bottom:none;}
   td code,th code{font-family:var(--mono);color:#cdd6e8;}
+
+  /* 教案分步卡片 */
+  .step-num{display:inline-block;font:600 12px var(--mono);color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+  .step-title{font-size:16px;margin:0 0 8px;font-weight:650;color:var(--text);}
+  .step-body{margin:0;font-size:14px;color:var(--muted);line-height:1.8;}
+  .step-body code.mono{font-family:var(--mono);color:#cdd6e8;background:rgba(255,255,255,.05);padding:1px 6px;border-radius:6px;}
+
+  /* 表格滚动容器与数据表格 */
+  .table-scroll{overflow-x:auto;}
+  .data-table{background:var(--surface);border:1px solid var(--line);border-collapse:collapse;width:100%;border-radius:14px;overflow:hidden;font-size:15px;}
+  .data-table th,.data-table td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);}
+  .data-table thead th{background:var(--surface-2);color:var(--text);font-weight:600;}
+  .data-table tr:last-child td{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -413,7 +426,229 @@
   </section>
 
   <section>
-  <div class="section-title"><span class="section-index">07</span><h2>下一集预告：PPS 边沿跳一下，凭什么就是整秒？</h2></div>
+    <div class="section-title"><span class="section-index">07</span><h2>教案：卫星晚了 75ms，GNSS 怎么算出准确时间？</h2></div>
+    <div class="card" style="margin-bottom:16px;">
+      <p>前几天你问过一个很关键的问题："卫星信号明明要飞 <b>75ms</b> 才到地面，GNSS 凭什么知道真正的整秒？"<br>
+      答案不是"<b>忽略</b>了这 75ms"，而是"<b>算出来</b>了它"——GNSS 定位的本质，就是把传播延迟当一个<b>未知数</b>，和其它量一起解出来。按下面 4 步讲，顺序最清晰。</p>
+    </div>
+
+    <div class="figure-frame">
+      <svg viewBox="0 0 720 420" width="100%" height="auto" role="img" aria-label="卫星发送准确时间但中间有耗时的示意图">
+        <defs>
+          <marker id="sw" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#6f6fff"></path></marker>
+          <marker id="sw2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#27d2bf"></path></marker>
+        </defs>
+
+        <!-- 标题 -->
+        <text x="360" y="30" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:16px;font-family:var(--font)">卫星发来「准确时间」——但 GNSS 怎么知道中间耗时？</text>
+
+        <!-- 卫星（左上，含太阳翼） -->
+        <g font-family="var(--font)">
+          <rect x="92" y="96" width="34" height="46" rx="5" fill="#2a3350" stroke="#ffffff1a"/>
+          <rect x="188" y="96" width="34" height="46" rx="5" fill="#2a3350" stroke="#ffffff1a"/>
+          <rect x="126" y="104" width="62" height="30" rx="8" fill="#1b2233" stroke="#27d2bf" stroke-width="1.4"/>
+          <text x="157" y="124" text-anchor="middle" style="fill:#27d2bf;font-weight:700;font-size:13px">卫星</text>
+          <text x="157" y="168" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">广播「准确时间」</text>
+        </g>
+
+        <!-- 时间波纹（从卫星向侧下方扩散的电磁波弧线） -->
+        <path d="M 168 152 A 26 26 0 0 1 208 146" fill="none" stroke="#27d2bf" stroke-width="1.4" opacity="0.5"/>
+        <path d="M 160 172 A 42 42 0 0 1 240 148" fill="none" stroke="#27d2bf" stroke-width="1.4" opacity="0.4"/>
+        <path d="M 214 110 A 26 26 0 0 1 180 130" fill="none" stroke="#27d2bf" stroke-width="1.2" opacity="0.35"/>
+
+        <!-- 广播波束：卫星 -> GNSS（下绕，标记耗时） -->
+        <path d="M 200 172 C 318 236, 422 252, 452 300" fill="none" stroke="#6f6fff" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round" marker-end="url(#sw)"/>
+
+        <!-- 中间：只显示“准确时间”包 + 大问号 + 耗时标签 -->
+        <g font-family="var(--font)">
+          <!-- 准确时间胶囊 -->
+          <rect x="286" y="196" width="128" height="34" rx="17" fill="#141926" stroke="#6f6fff" stroke-width="1.3"/>
+          <text x="350" y="218" text-anchor="middle" style="fill:#aab4ff;font-weight:600;font-size:13px">准确时间</text>
+
+          <!-- 耗时虚线箭头（带“?”的下划线，表示中间这段要算） -->
+          <line x1="350" y1="248" x2="350" y2="276" stroke="#27d2bf" stroke-width="1.6" marker-end="url(#sw2)"/>
+          
+          <!-- 问号：大、光标高亮 -->
+          <circle cx="340" cy="314" r="30" fill="#1b2233" stroke="#27d2bf" stroke-width="2"/>
+          <text x="340" y="328" text-anchor="middle" style="fill:#27d2bf;font-weight:700;font-size:34px;font-family:var(--font)">?</text>
+          <!-- 问号旁的小字（放问号左侧） -->
+          <text x="266" y="308" text-anchor="end" style="fill:#9aa5bd;font-size:12px">中间这段</text>
+          <text x="266" y="328" text-anchor="end" style="fill:#9aa5bd;font-size:12px">花了多久?</text>
+        </g>
+
+        <!-- GNSS 模块（右下，带引脚） -->
+        <g font-family="var(--font)">
+          <rect x="430" y="316" width="190" height="58" rx="10" fill="#1b2233" stroke="#6f6fff" stroke-width="1.6"/>
+          <text x="525" y="346" text-anchor="middle" style="fill:#e8ecf4;font-weight:650;font-size:14px">GNSS 模块</text>
+          <text x="525" y="365" text-anchor="middle" style="fill:#9aa5bd;font-size:11px">收到「准确时间」，却不知道走了多久</text>
+          <!-- 引脚 -->
+          <rect x="446" y="374" width="14" height="16" fill="#2a3350"/>
+          <rect x="484" y="374" width="14" height="16" fill="#2a3350"/>
+          <rect x="522" y="374" width="14" height="16" fill="#27d2bf"/>
+          <rect x="560" y="374" width="14" height="16" fill="#2a3350"/>
+          <rect x="598" y="374" width="14" height="16" fill="#2a3350"/>
+        </g>
+
+        <!-- 底部说明 -->
+        <text x="360" y="412" text-anchor="middle" style="fill:#9aa5bd;font-size:11px;font-family:var(--font)">卫星说“我在 12:00:00 发出的”——可传到我这儿，已经晚了一点</text>
+      </svg>
+      <p class="cap">卫星发来的是<b>准确时间</b>没错，但信号在传下来的<b>途中花了时间</b>。GNSS 收到时，那个"准确时刻"已经过了——<b>中间这段到底耗时多少？</b>这就是下一节要解的核心谜题。</p>
+    </div>
+
+    <!-- 四步教学卡片 -->
+    <div class="grid g-2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="step-num">第一步</div>
+        <h3 class="step-title">卫星信号自带「我几点发出的」</h3>
+        <p class="step-body">卫星播发的电文按<b>卫星原子钟</b>逐帧发出，接收机能测到"这帧是卫星时间几点几分几秒发的"。同时电文里带<b>星历</b>＋<b>卫星钟差修正</b>，告诉它：这颗星此刻在天上哪儿、它的钟和 GPS 时间差多少。</p>
+      </div>
+      <div class="card">
+        <div class="step-num">第二步</div>
+        <h3 class="step-title">「解方程」把传播延迟算出来</h3>
+        <p class="step-body">接收机的晶振<b>不贵也不准</b>，它和真实 GPS 时间有个未知偏差 Δt。设 4 个未知数：<code class="mono">(x,y,z) 位置</code>＋<code class="mono">Δt 钟差</code>。每颗卫星给一个方程，所以要<b>至少 4 颗卫星</b>才能解出它们。</p>
+      </div>
+      <div class="card">
+        <div class="step-num">第三步</div>
+        <h3 class="step-title">传播时间被「补偿」，不是被「忍受」</h3>
+        <p class="step-body">位置解出后，传播时间就是已知量：<code class="mono">距离 ÷ 光速 ≈ 67~86ms</code>，再修正电离层 / 对流层 / 相对论 / 卫星钟差。结论变成："那帧是 GPS 时间 T₁ 发出、走了 75.3ms，所以到达我这里的标准时间是 <code class="mono">T₁ + 75.3ms</code>。"</p>
+      </div>
+      <div class="card">
+        <div class="step-num">第四步</div>
+        <h3 class="step-title">PPS 就是「对准后的钟」在打拍子</h3>
+        <p class="step-body">接收机用解出的时间偏差<b>持续校准 / 驯服</b>自己的廉价晶振，把它驯成原子钟的节拍。于是它精确知道下一个整秒何时到来，就在那一瞬间拉高 PPS 引脚——上升沿就这样对齐了整秒。</p>
+      </div>
+    </div>
+
+    <!-- 深入：真实时间怎么算 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="step-num">深入解析</div>
+      <h3 class="step-title">那「真实时刻」到底是怎么算出来的？</h3>
+      <p class="step-body">数据包确实给了两样已知量：<b>卫星发出时刻 T_sv</b>、<b>卫星位置 (x,y,z)_星</b>。但还缺一个关键拼图——<b>信号飞了多久</b>。接收机另一只手量到的是本地钟读到的<b>收到时刻 T_rx</b>，而这个本地钟是<b>廉价晶振、本身就不准</b>（偏差 Δt）。于是：<code class="mono">伪距 = (T_rx − T_sv)×光速 = 真实距离 ＋ c·Δt</code>。<b>真实距离</b>由卫星位置（已知）和<b>接收机位置（未知）</b>决定，<b>c·Δt</b> 是钟偏造成的误差（也未知）。每颗星给一个方程，要解 4 个未知数 <code class="mono">(x,y,z,Δt)</code>，所以需要 ≥4 颗卫星。解出 <b>Δt</b> 后：<b>真实时刻 = T_rx − Δt</b>，GNSS 就用它对准下一秒 PPS。</p>
+      <div class="figure-frame" style="margin-top:16px;">
+        <svg viewBox="0 0 720 420" width="100%" height="auto" role="img" aria-label="GNSS通过解方程算出真实时间的链路图">
+          <defs>
+            <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#6f6fff"></path></marker>
+          </defs>
+          <g font-family="var(--font)">
+            <!-- 三个输入 -->
+            <rect x="40" y="40" width="200" height="76" rx="12" fill="#1b2233" stroke="#2c3442"/>
+            <text x="140" y="64" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--mono)">T_sv</text>
+            <text x="140" y="86" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">卫星发出时刻</text>
+            <text x="140" y="104" text-anchor="middle" style="fill:#69748c;font-size:11px">来自数据包 · 已知</text>
+
+            <rect x="260" y="40" width="200" height="76" rx="12" fill="#1b2233" stroke="#2c3442"/>
+            <text x="360" y="64" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--mono)">(x,y,z)_星</text>
+            <text x="360" y="86" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">卫星位置</text>
+            <text x="360" y="104" text-anchor="middle" style="fill:#69748c;font-size:11px">来自数据包 · 已知</text>
+
+            <rect x="480" y="40" width="200" height="76" rx="12" fill="#1b2233" stroke="#2c3442"/>
+            <text x="580" y="64" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--mono)">T_rx</text>
+            <text x="580" y="86" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">本地收到时刻</text>
+            <text x="580" y="104" text-anchor="middle" style="fill:#69748c;font-size:11px">本地晶振量到 · 不准</text>
+          </g>
+
+          <line x1="140" y1="116" x2="285" y2="152" stroke="#6f6fff" stroke-width="1.2" opacity="0.6"/>
+          <line x1="360" y1="116" x2="342" y2="152" stroke="#6f6fff" stroke-width="1.2" opacity="0.6"/>
+          <line x1="580" y1="116" x2="400" y2="152" stroke="#6f6fff" stroke-width="1.2" opacity="0.6"/>
+
+          <!-- 伪距 -->
+          <rect x="120" y="152" width="480" height="80" rx="12" fill="#141926" stroke="#6f6fff" stroke-width="1.5"/>
+          <text x="360" y="178" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">伪距 ＝ (T_rx − T_sv) × 光速</text>
+          <text x="360" y="202" text-anchor="middle" style="fill:#9aa5bd;font-size:13px;font-family:var(--mono)">＝ 真实距离 ＋ c·Δt（我的钟偏）</text>
+          <text x="360" y="222" text-anchor="middle" style="fill:#69748c;font-size:11px">真实距离=用(星位置,我位置)；Δt 未知 → 一起解</text>
+
+          <line x1="360" y1="232" x2="360" y2="256" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <!-- 解方程 -->
+          <rect x="150" y="258" width="420" height="74" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.6"/>
+          <text x="360" y="284" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">联立 ≥4 颗星 → 解出 (x,y,z) ＋ Δt</text>
+          <text x="360" y="308" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">每颗星一个方程，解 4 个未知数</text>
+
+          <line x1="360" y1="332" x2="360" y2="356" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <!-- 输出 -->
+          <rect x="120" y="358" width="480" height="62" rx="12" fill="#1b2233" stroke="#27d2bf" stroke-width="1.6"/>
+          <text x="360" y="380" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:14px;font-family:var(--font)">真实时刻 ＝ T_rx − Δt（去掉我的钟偏）</text>
+          <text x="360" y="402" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">→ PPS 上升沿就对准在这个真实整秒上</text>
+        </svg>
+        <p class="cap">先理解方向即可：<mark>数据包给已知位置+时刻 → 量出不准的 T_rx → 联立解出钟偏 Δt → 真实时刻浮出</mark>。</p>
+      </div>
+    </div>
+
+    <div class="figure-frame">
+      <svg viewBox="0 0 720 486" width="100%" height="auto" role="img" aria-label="从卫星广播时刻到PPS输出的四步链路图">
+        <defs>
+          <marker id="bn" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#6f6fff"></path></marker>
+        </defs>
+
+        <!-- 第1步：卫星发时刻 -->
+        <text x="32" y="30" style="fill:#27d2bf;font-weight:600;font-size:13px;font-family:var(--mono)">STEP 1</text>
+        <rect x="32" y="42" width="156" height="86" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="110" y="72" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">卫星广播</text>
+        <text x="110" y="96" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">按原子钟逐帧发出</text>
+        <text x="110" y="116" text-anchor="middle" style="fill:#e8ecf4;font-size:12px;font-family:var(--mono)">"我几点发的"</text>
+
+        <!-- 第2步：解方程 -->
+        <text x="244" y="30" style="fill:#27d2bf;font-weight:600;font-size:13px;font-family:var(--mono)">STEP 2</text>
+        <rect x="244" y="42" width="204" height="86" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.5"/>
+        <text x="346" y="72" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">联立解方程</text>
+        <text x="346" y="96" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">未知数 x,y,z ＋ Δt</text>
+        <text x="346" y="116" text-anchor="middle" style="fill:#e8ecf4;font-size:12px;font-family:var(--mono)">≥4 星 → 4 个方程</text>
+
+        <!-- 第3步：补偿 -->
+        <text x="500" y="30" style="fill:#27d2bf;font-weight:600;font-size:13px;font-family:var(--mono)">STEP 3</text>
+        <rect x="500" y="42" width="188" height="86" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="594" y="72" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">补偿传播延迟</text>
+        <text x="594" y="96" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">距离÷光速≈75ms</text>
+        <text x="594" y="116" text-anchor="middle" style="fill:#e8ecf4;font-size:12px;font-family:var(--font)">真实时刻=发出+75ms</text>
+
+        <!-- 连线 STEP1-STEP2, STEP2-STEP3 -->
+        <line x1="188" y1="85" x2="244" y2="85" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#bn)"/>
+        <line x1="448" y1="85" x2="500" y2="85" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#bn)"/>
+
+        <!-- 第4步：PPS -->
+        <line x1="594" y1="128" x2="594" y2="188" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#bn)"/>
+        <text x="32" y="180" style="fill:#27d2bf;font-weight:600;font-size:13px;font-family:var(--mono)">STEP 4</text>
+        <rect x="300" y="188" width="420" height="120" rx="12" fill="#141926" stroke="#27d2bf" stroke-width="1.5"/>
+        <text x="510" y="216" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:15px;font-family:var(--font)">驯服晶振 → 对准整秒打拍子</text>
+        <text x="510" y="246" text-anchor="middle" style="fill:#e8ecf4;font-size:13px;font-family:var(--font)">用 Δt 持续校准内部晶振</text>
+        <text x="510" y="270" text-anchor="middle" style="fill:#e8ecf4;font-size:13px;font-family:var(--font)">知道下一秒何时来 → 那一刻拉高 PPS</text>
+        <text x="510" y="294" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">上升沿就这样对齐整秒</text>
+
+        <!-- 波形 -->
+        <polyline points="96,356 96,330 132,330 132,352 168,352 168,330 204,330 204,352 240,352 240,330 276,330  276,352" stroke="#22a5f7" stroke-width="2" fill="none"/>
+        <text x="156" y="382" text-anchor="middle" style="fill:#22a5f7;font-size:12px;font-family:var(--mono)">PPS 输出 ~1Hz</text>
+        <circle cx="96" cy="330" r="4" fill="#27d2bf"/>
+        <text x="108" y="324" style="fill:#27d2bf;font-size:11px;font-family:var(--font)">上升沿＝整秒</text>
+
+        <!-- 前提 -->
+        <rect x="32" y="404" width="656" height="62" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+        <text x="360" y="430" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">前提：定位解算要收敛（已驯服）</text>
+        <text x="360" y="454" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">刚上电未定位时 Δt 是未知的，PPS 不准甚至不输出——这就是"冷启动没有稳定 PPS"的原因</text>
+      </svg>
+      <p class="cap">一句话：卫星"晚到"的 75ms <b>不是误差，而是解方程的原材料</b>——位置和准确时间，本来就是同一组方程解出的两个副产品。</p>
+    </div>
+
+    <!-- 误差量级表 -->
+    <div class="card" style="margin-top:16px;">
+      <h3 class="step-title" style="margin-top:0;">各个误差环节是多少量级？</h3>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>环节</th><th>误差量级</th></tr></thead>
+          <tbody>
+            <tr><td>卫星原子钟</td><td>纳秒级</td></tr>
+            <tr><td>传播延迟（~75ms）→ 被解方程算出并补偿</td><td>残余误差 分米级</td></tr>
+            <tr><td>电离层 / 对流层修正残余</td><td>纳秒 ~ 亚微秒</td></tr>
+            <tr><td>模块内部钟驯服</td><td>亚微秒级</td></tr>
+            <tr><td><b>最终 PPS 边沿精度</b></td><td><b>普通模块几十 ~ 100 纳秒级</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+  <div class="section-title"><span class="section-index">08</span><h2>下一集预告：PPS 边沿跳一下，凭什么就是整秒？</h2></div>
 
   <div class="teaser">
     <span class="next-tag"><span class="dot"></span>NEXT EPISODE</span>
