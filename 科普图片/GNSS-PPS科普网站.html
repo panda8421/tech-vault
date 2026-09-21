@@ -53,6 +53,17 @@
   .cap{color:var(--muted);font-size:14px;text-align:center;margin-top:14px;}
   .cap code,.inline-code{font-family:var(--mono);background:rgba(255,255,255,.08);padding:1px 7px;border-radius:6px;font-size:.9em;color:#cdd6e8;}
 
+  /* 代码块 */
+  .code-frame{background:#0d1117;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:16px;}
+  .code-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#161b22;border-bottom:1px solid var(--line);font:600 13px var(--mono);color:#cdd6e8;}
+  .code-frame pre{background:transparent;margin:0;padding:18px 16px;overflow-x:auto;line-height:1.7;font:13px/1.7 var(--mono);}
+  .code-frame code{font-family:var(--mono);}
+  /* 语法着色 */
+  .ck{color:#7ee787;}        /* 注释 */
+  .cl{color:#79c0ff;}        /* 函数/宏 */
+  .co{color:#ffa657;}        /* 常量 */
+  .il{font-family:var(--mono);background:rgba(114,137,218,.16);padding:1px 7px;border-radius:6px;font-size:.88em;color:#a5b4fc;}
+
   /* 图片卡片 */
   .img-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
   .img-card img{display:block;width:100%;height:auto;background:#fff;}
@@ -123,10 +134,35 @@
   .data-table th,.data-table td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);}
   .data-table thead th{background:var(--surface-2);color:var(--text);font-weight:600;}
   .data-table tr:last-child td{border-bottom:none;}
+
+  /* 顶部标签切换器：PPS / USB */
+  .tabs{display:flex;gap:10px;margin-bottom:30px;border-bottom:1px solid var(--line);padding-bottom:14px;flex-wrap:wrap;justify-content:center;}
+  .tab-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border:1px solid var(--line);
+    border-radius:999px;background:var(--surface);color:var(--muted);font:600 14px var(--font);cursor:pointer;transition:all .2s;}
+  .tab-btn:hover{color:var(--text);border-color:rgba(111,111,255,.5);}
+  .tab-btn.active{color:#fff;border-color:rgba(111,111,255,.55);background:linear-gradient(180deg,rgba(111,111,255,.22),rgba(111,111,255,.08));box-shadow:0 0 0 1px rgba(111,111,255,.18) inset;}
+  .tab-btn .chip{font:700 11px var(--mono);color:var(--brand-2);}
+  .panel{display:none;}
+  .panel.active{display:block;animation:panelIn .3s ease;}
+  @keyframes panelIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  /* 外部链接 */
+  .outlink{color:var(--brand-2);text-decoration:none;border-bottom:1px dashed rgba(34,165,247,.5);transition:color .15s;}
+  .outlink:hover{color:#fff;border-bottom-color:var(--brand-2);}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- 顶部标签切换器 -->
+  <div class="tabs" role="tablist" aria-label="主题切换">
+    <button class="tab-btn active" data-tab="pps" role="tab" aria-selected="true"><span class="chip">GNSS</span> PPS 授时</button>
+    <button class="tab-btn" data-tab="usb" role="tab" aria-selected="false"><span class="chip">USB</span> 主机知识</button>
+    <button class="tab-btn" data-tab="wpa" role="tab" aria-selected="false"><span class="chip">Wi-Fi</span> WPA2 加密</button>
+  </div>
+
+  <!-- 面板一：PPS 授时 -->
+  <div class="panel active" id="tab-pps" data-panel="pps">
 
   <header>
     <span class="eyebrow">GNSS 知识科普</span>
@@ -525,7 +561,7 @@
       <h3 class="step-title">那「真实时刻」到底是怎么算出来的？</h3>
       <p class="step-body">数据包确实给了两样已知量：<b>卫星发出时刻 T_sv</b>、<b>卫星位置 (x,y,z)_星</b>。但还缺一个关键拼图——<b>信号飞了多久</b>。接收机另一只手量到的是本地钟读到的<b>收到时刻 T_rx</b>，而这个本地钟是<b>廉价晶振、本身就不准</b>（偏差 Δt）。于是：<code class="mono">伪距 = (T_rx − T_sv)×光速 = 真实距离 ＋ c·Δt</code>。<b>真实距离</b>由卫星位置（已知）和<b>接收机位置（未知）</b>决定，<b>c·Δt</b> 是钟偏造成的误差（也未知）。每颗星给一个方程，要解 4 个未知数 <code class="mono">(x,y,z,Δt)</code>，所以需要 ≥4 颗卫星。解出 <b>Δt</b> 后：<b>真实时刻 = T_rx − Δt</b>，GNSS 就用它对准下一秒 PPS。</p>
       <div class="figure-frame" style="margin-top:16px;">
-        <svg viewBox="0 0 720 420" width="100%" height="auto" role="img" aria-label="GNSS通过解方程算出真实时间的链路图">
+        <svg viewBox="0 0 720 452" width="100%" height="auto" role="img" aria-label="GNSS通过解方程算出真实时间的链路图">
           <defs>
             <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#6f6fff"></path></marker>
           </defs>
@@ -555,21 +591,27 @@
           <rect x="120" y="152" width="480" height="80" rx="12" fill="#141926" stroke="#6f6fff" stroke-width="1.5"/>
           <text x="360" y="178" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">伪距 ＝ (T_rx − T_sv) × 光速</text>
           <text x="360" y="202" text-anchor="middle" style="fill:#9aa5bd;font-size:13px;font-family:var(--mono)">＝ 真实距离 ＋ c·Δt（我的钟偏）</text>
-          <text x="360" y="222" text-anchor="middle" style="fill:#69748c;font-size:11px">真实距离=用(星位置,我位置)；Δt 未知 → 一起解</text>
+          <text x="360" y="222" text-anchor="middle" style="fill:#69748c;font-size:11px">真实距离 =｜卫星位置 － 接收机位置｜</text>
 
-          <line x1="360" y1="232" x2="360" y2="256" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
+          <!-- 真实距离里裹着接收机的三个未知数 -->
+          <g font-family="var(--font)">
+            <rect x="196" y="236" width="328" height="30" rx="15" fill="#1b2233" stroke="#27d2bf" stroke-width="1.4"/>
+            <text x="360" y="256" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:12px">真实距离里藏着接收机 3 个未知数：x、y、z</text>
+          </g>
+
+          <line x1="360" y1="266" x2="360" y2="286" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
 
           <!-- 解方程 -->
-          <rect x="150" y="258" width="420" height="74" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.6"/>
-          <text x="360" y="284" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">联立 ≥4 颗星 → 解出 (x,y,z) ＋ Δt</text>
-          <text x="360" y="308" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">每颗星一个方程，解 4 个未知数</text>
+          <rect x="150" y="288" width="420" height="74" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.6"/>
+          <text x="360" y="314" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px;font-family:var(--font)">联立 ≥4 颗星 → 解出 (x,y,z) ＋ Δt</text>
+          <text x="360" y="338" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">每颗星一个方程 · 共 4 个未知数</text>
 
-          <line x1="360" y1="332" x2="360" y2="356" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="360" y1="362" x2="360" y2="382" stroke="#6f6fff" stroke-width="1.5" marker-end="url(#ar)"/>
 
           <!-- 输出 -->
-          <rect x="120" y="358" width="480" height="62" rx="12" fill="#1b2233" stroke="#27d2bf" stroke-width="1.6"/>
-          <text x="360" y="380" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:14px;font-family:var(--font)">真实时刻 ＝ T_rx − Δt（去掉我的钟偏）</text>
-          <text x="360" y="402" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">→ PPS 上升沿就对准在这个真实整秒上</text>
+          <rect x="120" y="384" width="480" height="62" rx="12" fill="#1b2233" stroke="#27d2bf" stroke-width="1.6"/>
+          <text x="360" y="406" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:14px;font-family:var(--font)">真实时刻 ＝ T_rx − Δt（去掉我的钟偏）</text>
+          <text x="360" y="428" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">→ PPS 上升沿就对准在这个真实整秒上</text>
         </svg>
         <p class="cap">先理解方向即可：<mark>数据包给已知位置+时刻 → 量出不准的 T_rx → 联立解出钟偏 Δt → 真实时刻浮出</mark>。</p>
       </div>
@@ -710,8 +752,310 @@
   </div>
   </section>
 
-  <footer>GNSS · PPS 科普内容 · 下集预告确认了这套"边沿 = 时间锚点"，关注后续揭晓 PPS 生成的秘密</footer>
+  </div><!-- /PPS 面板 -->
+
+  <!-- 面板二：USB 主机知识 -->
+  <div class="panel" id="tab-usb" data-panel="usb">
+
+  <header>
+    <span class="eyebrow">USB 知识科普</span>
+    <h1>USB 主机有什么用？</h1>
+    <p class="sub">从设备插入到上手使用，主机是怎么一步步把设备"认出来"的</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>枚举（Enumeration）是啥意思</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>把"插上的电"变成"能用的设备"</h3>
+        <p><mark>枚举</mark>就是设备插进 USB 口后，主机把它<mark>认出来、问清楚、配好</mark>再交给系统使用的全过程。没枚举完，设备只是"带电但形同虚设"。</p>
+      </div>
+      <div class="card">
+        <h3>枚举按什么步骤走</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>检测插入</b>：硬件捕捉电平跳变。</span></li>
+          <li><span class="dot">2</span><span><b>复位到地址 0</b>：设备回到默认地址。</span></li>
+          <li><span class="dot">3</span><span><b>读描述符</b>：自我介绍 VID/PID/接口/端点。</span></li>
+          <li><span class="dot">4</span><span><b>分配地址</b>：发给设备唯一地址。</span></li>
+          <li><span class="dot">5</span><span><b>配置生效</b>：加载驱动，进入可用状态。</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="figure-frame" style="margin-top:16px;">
+      <svg viewBox="0 0 720 300" width="100%" height="auto" role="img" aria-label="USB枚举五步流程图">
+        <defs>
+          <marker id="usba" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#27d2bf"></path></marker>
+        </defs>
+        <text x="360" y="34" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:16px;font-family:var(--font)">USB 枚举五步</text>
+        <g font-family="var(--font)">
+          <rect x="40" y="64" width="116" height="92" rx="10" fill="#1b2233" stroke="#27d2bf" stroke-width="1.4"/>
+          <text x="98" y="96" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">检测插入</text>
+          <text x="98" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">电平跳变</text>
+          <text x="98" y="140" text-anchor="middle" style="fill:#69748c;font-size:11px">产生中断</text>
+          <rect x="176" y="64" width="116" height="92" rx="10" fill="#1b2233" stroke="#ffffff1a"/>
+          <text x="234" y="96" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">复位地址 0</text>
+          <text x="234" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">设备回默认</text>
+          <rect x="312" y="64" width="116" height="92" rx="10" fill="#1b2233" stroke="#ffffff1a"/>
+          <text x="370" y="96" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">读描述符</text>
+          <text x="370" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">自我介绍</text>
+          <text x="370" y="140" text-anchor="middle" style="fill:#69748c;font-size:11px">VID/PID/端点</text>
+          <rect x="448" y="64" width="116" height="92" rx="10" fill="#1b2233" stroke="#ffffff1a"/>
+          <text x="506" y="96" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">分配地址</text>
+          <text x="506" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">唯一地址</text>
+          <text x="506" y="140" text-anchor="middle" style="fill:#69748c;font-size:11px">1~127</text>
+          <rect x="584" y="64" width="96" height="92" rx="10" fill="#141926" stroke="#6f6fff" stroke-width="1.6"/>
+          <text x="632" y="96" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">配置生效</text>
+          <text x="632" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">加载驱动</text>
+          <text x="632" y="140" text-anchor="middle" style="fill:#aab4ff;font-size:11px">可用！</text>
+        </g>
+        <path d="M156 110 L172 110" stroke="#27d2bf" stroke-width="1.6" marker-end="url(#usba)"/>
+        <path d="M292 110 L308 110" stroke="#27d2bf" stroke-width="1.6" marker-end="url(#usba)"/>
+        <path d="M428 110 L444 110" stroke="#27d2bf" stroke-width="1.6" marker-end="url(#usba)"/>
+        <path d="M564 110 L580 110" stroke="#27d2bf" stroke-width="1.6" marker-end="url(#usba)"/>
+        <text x="360" y="200" text-anchor="middle" style="fill:#9aa5bd;font-size:13px;font-family:var(--font)">关键：主机需要从设备"读清楚"——设备是谁(VID/PID)、要几个接口、几个端点、怎么传数据</text>
+        <text x="360" y="226" text-anchor="middle" style="fill:#9aa5bd;font-size:13px;font-family:var(--font)">读明白之后才分配地址、加载对应驱动，设备才真正"可用"</text>
+        <line x1="180" y1="176" x2="180" y2="244" stroke="#6f6fff" stroke-width="1.4"/>
+        <circle cx="180" cy="248" r="4" fill="#6f6fff"/>
+        <text x="196" y="252" style="fill:#aab4ff;font-size:12px;font-family:var(--font)">枚举完成 = 可用</text>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>主机怎么知道设备插进来了</h2></div>
+    <div class="card">
+      <h3>不是轮询，是硬件电平检测 + 中断</h3>
+      <p>主机 <b>不是</b>隔一段时间去"查"端口，而是靠信号线的物理特性由硬件电路自动捕捉。设备一插入，硬件立刻跳出中断，固件才被叫醒。原理如下：</p>
+    </div>
+    <div class="figure-frame" style="margin-top:16px;">
+      <svg viewBox="0 0 720 300" width="100%" height="auto" role="img" aria-label="USB插入检测机制示意图">
+        <defs>
+          <marker id="usbd" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#6f6fff"></path></marker>
+          <marker id="usbe" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#27d2bf"></path></marker>
+        </defs>
+        <text x="360" y="30" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:16px;font-family:var(--font)">主机：双下拉 → 检测哪根线被上拉 → 触发中断</text>
+        <g font-family="var(--font)">
+          <rect x="40" y="70" width="170" height="180" rx="12" fill="#1b2233" stroke="#6f6fff" stroke-width="1.4"/>
+          <text x="125" y="98" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">USB 主机</text>
+          <text x="125" y="120" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">D+ / D- 都接 15kΩ 下拉</text>
+          <text x="125" y="142" text-anchor="middle" style="fill:#69748c;font-size:11px">空闲时两根都为 0</text>
+          <line x1="210" y1="100" x2="300" y2="100" stroke="#6f6fff" stroke-width="1.6"/>
+          <text x="260" y="92" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">D+ 被顶成 1</text>
+          <line x1="210" y1="150" x2="300" y2="150" stroke="#9aa5bd" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="260" y="142" text-anchor="middle" style="fill:#69748c;font-size:12px">D- 仍为 0</text>
+          <text x="300" y="106" text-anchor="middle" style="fill:#aab4ff;font-size:12px">→ 触发中断</text>
+          <path d="M300 100 L430 100" stroke="#27d2bf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#usbe)"/>
+          <rect x="436" y="62" width="190" height="34" rx="17" fill="#1b2233" stroke="#27d2bf" stroke-width="1.4"/>
+          <text x="531" y="84" text-anchor="middle" style="fill:#27d2bf;font-weight:600;font-size:13px">设备 1.5kΩ 上拉</text>
+          <rect x="436" y="130" width="190" height="130" rx="12" fill="#1b2233" stroke="#ffffff1a"/>
+          <text x="531" y="160" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:14px">USB 设备</text>
+          <text x="531" y="184" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">全/高速 → 上拉 D+</text>
+          <text x="531" y="206" text-anchor="middle" style="fill:#9aa5bd;font-size:12px">低速   → 上拉 D-</text>
+          <text x="531" y="228" text-anchor="middle" style="fill:#69748c;font-size:11px">靠"哪根被拉高"区分速度</text>
+          <text x="531" y="248" text-anchor="middle" style="fill:#69748c;font-size:11px">电平跳变 → 主机中断</text>
+        </g>
+        <text x="360" y="276" text-anchor="middle" style="fill:#9aa5bd;font-size:12px;font-family:var(--font)">主机端程序不做轮询：电平一变化，硬件比较器检测到 → 直接触发中断，固件才接手开始枚举</text>
+      </svg>
+    </div>
+
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="data-table">
+        <thead><tr><th>问题</th><th>答案</th></tr></thead>
+        <tbody>
+          <tr><td>主机怎么知道设备插进来了？</td><td>靠设备 <b>1.5kΩ 上拉电阻</b>把 D+ 或 D- 顶成高电平</td></tr>
+          <tr><td>是软件轮询吗？</td><td><b>不是</b>，是硬件电平检测 → 触发中断</td></tr>
+          <tr><td>空闲时为什么没动静？</td><td>主机 <b>15kΩ 下拉</b>把 D+/D- 都压成 0</td></tr>
+          <tr><td>低速设备拉哪根？</td><td><b>D-</b></td></tr>
+          <tr><td>全速/高速设备拉哪根？</td><td><b>D+</b></td></tr>
+          <tr><td>主机 D+ / D- 都要下拉吗？</td><td>都要接 <b>15kΩ 下拉</b>到地</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>这个"哪根被拉高"是谁规定的？</h2></div>
+    <div class="card hot">
+      <h3>由 USB 规范（USB-IF）在硬件层固化</h3>
+      <p>不是工程自创，而是 <mark>USB Implementers Forum（USB-IF）</mark> 在《USB 规范》电气章节里锁死的。主机<b>双下拉</b>、全/高速设备<b>上拉 D+</b>、低速设备<b>上拉 D-</b>，靠"哪根线变 1"来识别设备速度级别。</p>
+    </div>
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="data-table">
+        <thead><tr><th>规定内容</th><th>出处（含原文链接）</th></tr></thead>
+        <tbody>
+          <tr><td>全/高速设备上拉 <b>D+</b></td><td><a class="outlink" href="https://www.usb.org/document-library/usb-20-specification" target="_blank" rel="noopener noreferrer">USB 2.0 规范 · 电气/接口章节 ↗</a></td></tr>
+          <tr><td>低速设备上拉 <b>D-</b></td><td><a class="outlink" href="https://www.usb.org/document-library/usb-20-specification" target="_blank" rel="noopener noreferrer">USB 2.0 规范 · 电气/接口章节 ↗</a></td></tr>
+          <tr><td>主机 D+ / D- 双 15kΩ 下拉</td><td><a class="outlink" href="https://www.usb.org/document-library/usb-20-specification" target="_blank" rel="noopener noreferrer">USB 2.0 规范 · 主机电气要求 ↗</a></td></tr>
+          <tr><td>设备 1.5kΩ 上拉</td><td><a class="outlink" href="https://www.usb.org/document-library/usb-20-specification" target="_blank" rel="noopener noreferrer">USB 2.0 规范 · 设备电气要求 ↗</a></td></tr>
+        </tbody>
+      </table>
+      <p class="cap">USB-IF 官方原文：Universal Serial Bus 2.0 Specification（上方链接即官方下载页）。链接为对外跳转，需联网访问。<a class="outlink" href="https://www.usb.org/documents" target="_blank" rel="noopener noreferrer">更多 USB 官方文档 ↗</a></p>
+    </div>
+  </section>
+
+  </div><!-- /USB 面板 -->
+
+  <!-- 面板三：WPA2 加密 -->
+  <div class="panel" id="tab-wpa" data-panel="wpa">
+
+  <header>
+    <span class="eyebrow">Wi-Fi 安全科普</span>
+    <h1>WPA2：Wi-Fi 加密怎么保你上网安全？</h1>
+    <p class="sub">每一项 Wi-Fi 密码的背后，都有一套让它"看不懂别人、也怕别人看懂"的加密协议</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>一句话理解 WPA2</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>WPA2 = 第二代 Wi-Fi 保护接入</h3>
+        <p>WPA（Wi-Fi Protected Access，Wi-Fi 保护接入）是一个<b>加密与认证协议族</b>，用来保护无线数据不被窃听、不被篡改。<mark>WPA2 是其中被广泛使用的第二版</mark>，也是大家最熟悉的"Wi-Fi 密码"背后的加密标准。</p>
+      </div>
+      <div class="card">
+        <h3>它管了两件事</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>认证</b>：确认"真的是你"，
+               通过密码校验上网者身份。</span></li>
+          <li><span class="dot">2</span><span><b>加密</b>：让网上传的数据变成
+              别人看不懂的密文。</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>WPA 家族的演进</h2></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>标准</th><th>加密算法</th><th>地位</th></tr></thead>
+        <tbody>
+          <tr><td><b>WEP</b>（远古）</td><td>RC4（弱）</td><td>早已被破解，勿用</td></tr>
+          <tr><td><b>WPA</b>（第一代）</td><td>TKIP</td><td>过渡方案，安全性一般</td></tr>
+          <tr><td><b>WPA2</b>（第二代）</td><td>AES / CCMP</td><td style="color:#7ee787;">当前主流，推荐</td></tr>
+          <tr><td><b>WPA3</b>（第三代）</td><td>AES / GCMP</td><td>最新，正在普及</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap">核心关键词：<b>WPA2 用 AES 加密</b>，取代了 WPA 的 TKIP 和 WEP 的 RC4，安全性跨代提升——这也是"选 WPA2/AES"比"选 WEP/TKIP"安全得多的原因。</p>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>WPA2 的两种工作模式</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>① WPA2-Personal（家用/小办）</h3>
+        <p>也叫 <b>WPA2-PSK</b>。大家共用同一个<mark>预共享密钥（密码）</mark>，用 <b>PSK 握手（四次握手）</b>协商出会话密钥。简单方便，是家用路由器的默认形态。</p>
+      </div>
+      <div class="card">
+        <h3>② WPA2-Enterprise（企业）</h3>
+        <p>对接 <b>802.1X / RADIUS 服务器</b>，每个用户有独立账号。<mark>每个会话单独认证、密钥互相独立</mark>，一人一密，安全性更高，用于企业/校园网。</p>
+        <p class="cap" style="margin-top:8px;">手上那台家用路由器，你设的"Wi-Fi 密码"通常就是 WPA2-Personal 的那个 PSK。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">04</span><h2>一次 HTTPS 的比喻：加密干了啥</h2></div>
+    <div class="figure-frame">
+      <svg viewBox="0 0 720 300" width="100%" height="auto" role="img" aria-label="WPA2加密传输示意：明文 vs 密文">
+        <defs>
+          <marker id="wpaa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#27d2bf"></path></marker>
+          <marker id="wpal" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#9aa5bd"></path></marker>
+        </defs>
+        <text x="360" y="32" text-anchor="middle" style="fill:#e8ecf4;font-weight:600;font-size:16px;font-family:var(--font)">同一份数据，没有加密 vs 有 WPA2</text>
+        <g font-family="var(--font)">
+          <!-- 左：无加密 -->
+          <rect x="40" y="66" width="290" height="52" rx="10" fill="#2a1f2a" stroke="#ff6b6b" stroke-width="1.4"/>
+          <text x="70" y="90" style="fill:#ff9d9d;font-weight:600;font-size:13px">无加密（明文）</text>
+          <text x="70" y="110" style="fill:#e8ecf4;font-size:12px">密码: 123456 · 卡号: 6222... </text>
+          <text x="185" y="150" text-anchor="middle" style="fill:#9aa5bd;font-size:11px">旁路者一眼看光表看光</text>
+          <rect x="66" y="176" width="238" height="30" rx="8" fill="none" stroke="#ff6b6b" stroke-width="1.2"/>
+          <text x="185" y="196" text-anchor="middle" style="fill:#ff9d9d;font-size:12px">✗ 极易被窃听、篡改</text>
+          <!-- 右：有加密 -->
+          <rect x="390" y="66" width="290" height="52" rx="10" fill="#141d2f" stroke="#27d2bf" stroke-width="1.4"/>
+          <text x="420" y="90" style="fill:#7ee787;font-weight:600;font-size:13px">有 WPA2（密文）</text>
+          <text x="420" y="110" style="fill:#c2ccdd;font-size:12px">qFn6$#2@9z&vPk...（乱码）</text>
+          <text x="535" y="150" text-anchor="middle" style="fill:#9aa5bd;font-size:11px">旁路者看到的只是一堆乱码</text>
+          <rect x="416" y="176" width="238" height="30" rx="8" fill="none" stroke="#27d2bf" stroke-width="1.2"/>
+          <text x="535" y="196" text-anchor="middle" style="fill:#7ee787;font-size:12px">✓ 内容被加密，无法直接读取</text>
+        </g>
+        <text x="360" y="252" text-anchor="middle" style="fill:#9aa5bd;font-size:13px;font-family:var(--font)">WPA2 就是在"发送前"把数据加密成乱码、"接收端验证后"再还原——中间被截获也只是乱码。</text>
+        <text x="360" y="276" text-anchor="middle" style="fill:#6b7691;font-size:12px;font-family:var(--font)">右边为你自己的设备和路由器，左边为无保护的场景（示意，不还原真实报文结构）</text>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">05</span><h2>实际使用例程：ESP32 用 WPA2 连 Wi-Fi</h2></div>
+    <div class="grid g-2" style="margin-bottom:4px;">
+      <div class="card hot">
+        <h3>这段代码在干嘛</h3>
+        <p>这是 ESP32 / ESP-IDF 里典型的<b>自动连接已保存网络</b>的逻辑：从<b> NVS 非易失存储</b>读回
+        SSID 和密码 → 填进 <code class="il">wifi_config_t</code> → 用
+        <code class="il">WIFI_AUTH_WPA2_PSK</code> 设最低加密标准 →
+        调 <code class="il">esp_wifi_set_config</code> 应用 → <code class="il">esp_wifi_connect</code> 发起连接。</p>
+      </div>
+      <div class="card">
+        <h3>WPA2 在这里起的作用</h3>
+        <p>一行 <code class="il">threshold.authmode</code> 就设好了<b>安全下限</b>：<br/>
+        ✅ 接受 WPA2/WPA3 这类安全网络<br/>
+        ❌ 拒绝 WEP / 开放 / 老 WPA 弱网<br/>
+        <span class="cap" style="font-size:12px;">这就是"代码里实际用 WPA2"的开关所在。</span></p>
+      </div>
+    </div>
+
+    <div class="code-frame">
+      <div class="code-head">
+        <span>wifi_connect_wpa2.c</span>
+        <span style="color:var(--muted);font-size:12px;">ESP-IDF · 关键片段</span>
+      </div>
+<pre><code><span class="ck">// 1) 从 NVS 非易失存储读回已保存的 SSID 与密码
+nvs_get_str(handle, WIFI_NVS_KEY_SPA_NAME,  (char*)cfg.sta.ssid,  &lenSsid);
+nvs_get_str(handle, WIFI_NVS_KEY_SPA_PASS,  (char*)cfg.sta.password, &lenPass);
+
+</span><span class="ck">// 2) 关键：把最低认证阈值设为 WPA2-PSK
+//    = 只接受 WPA2 及以上安全级别的网络（拒绝 WEP / WPA-psk / OPEN）
+cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+
+</span><span class="cl">ESP_ERROR_CHECK</span>(<span class="cl">esp_wifi_set_config</span>(<span class="co">WIFI_IF_STA</span>, &cfg));
+<span class="cl">ESP_ERROR_CHECK</span>(<span class="cl">esp_wifi_connect</span>());   <span class="ck">// 发起连接</span>
+
+<span class="ck">// 3) 连接状态用 LED 反馈（来自你的实际代码注释）</span></code></pre>
+    </div>
+
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="data-table">
+        <thead><tr><th>要点</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code class="il">WIFI_AUTH_WPA2_PSK</code></td><td>WPA2-个人（预共享密钥）认证模式</td></tr>
+          <tr><td>它是"阈值"不是"强制"</td><td>接受 WPA2 及<b>更高</b>级；拒绝更低（WPA/OPEN）</td></tr>
+          <tr><td>密码来自哪里</td><td>NVS 里存的 <code class="il">8~63</code> 字符预共享密钥</td></tr>
+          <tr><td>实际加密算法</td><td>拿到密钥后协商，WPA2 走 <b>AES/CCMP</b> 加密数据</td></tr>
+          <tr><td>先保存后自动连</td><td>设备开机从 NVS 读密，免手动输入</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  </div><!-- /WPA2 面板 -->
+
+  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 · 顶部可切换主题</footer>
 
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var tabs = document.querySelectorAll('.tab-btn');
+    var panels = document.querySelectorAll('.panel');
+    function activate(name){
+      tabs.forEach(function(b){ var on = b.getAttribute('data-tab') === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      panels.forEach(function(p){ var on = p.getAttribute('data-panel') === name; p.classList.toggle('active', on); });
+    }
+    tabs.forEach(function(b){
+      b.addEventListener('click', function(){ activate(b.getAttribute('data-tab')); });
+    });
+  });
+</script>
 </body>
 </html>
