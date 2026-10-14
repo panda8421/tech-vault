@@ -159,6 +159,7 @@
     <button class="tab-btn active" data-tab="pps" role="tab" aria-selected="true"><span class="chip">GNSS</span> PPS 授时</button>
     <button class="tab-btn" data-tab="usb" role="tab" aria-selected="false"><span class="chip">USB</span> 主机知识</button>
     <button class="tab-btn" data-tab="wpa" role="tab" aria-selected="false"><span class="chip">Wi-Fi</span> WPA2 加密</button>
+    <button class="tab-btn" data-tab="git" role="tab" aria-selected="false"><span class="chip">Git</span> Rebase 使用</button>
   </div>
 
   <!-- 面板一：PPS 授时 -->
@@ -1040,7 +1041,187 @@ cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
 
   </div><!-- /WPA2 面板 -->
 
-  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 · 顶部可切换主题</footer>
+  <!-- 面板四：Git Rebase -->
+  <div class="panel" id="tab-git" data-panel="git">
+
+  <header>
+    <span class="eyebrow">Git 协作科普</span>
+    <h1>Git Rebase：提交历史为什么能"变"直？</h1>
+    <p class="sub">同样是合并分支，merge 是"原地打结"，rebase 是"拆了重排"——一张图看懂两种历史观</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>一句话理解 Rebase（变基）</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>Rebase = 换个基底，重放提交</h3>
+        <p>你的功能分支是从 main 某个旧点上"长"出来的。<mark>rebase 就是把你的提交一个个摘下来，接到 main 的最新顶端重新提交一遍</mark>——基底变了，所以叫"变基"。从此历史像一条直线。</p>
+      </div>
+      <div class="card">
+        <h3>它和 merge 的本质区别</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>merge</b>：两个分支原地汇合，产生一个"合并提交"，历史保留分叉的真实形状。</span></li>
+          <li><span class="dot">2</span><span><b>rebase</b>：重写历史，把分叉"拉直"，看起来就像你从最新代码上一次开发出来的。</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>一张图看懂：merge vs rebase</h2></div>
+    <div class="card">
+      <svg viewBox="0 0 920 320" style="width:100%;height:auto;display:block;" role="img" aria-label="merge 与 rebase 对比图">
+        <!-- 左半：merge -->
+        <text x="230" y="32" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">merge：原地汇合</text>
+        <line x1="50" y1="230" x2="425" y2="230" stroke="#6f6fff" stroke-width="3"/>
+        <circle cx="80" cy="230" r="9" fill="#6f6fff"/><text x="80" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C1</text>
+        <circle cx="170" cy="230" r="9" fill="#6f6fff"/><text x="170" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C2</text>
+        <circle cx="330" cy="230" r="9" fill="#6f6fff"/><text x="330" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
+        <path d="M170 230 C 200 165, 212 132, 245 120" stroke="#22d3ee" stroke-width="3" fill="none"/>
+        <line x1="245" y1="120" x2="330" y2="120" stroke="#22d3ee" stroke-width="3"/>
+        <circle cx="255" cy="120" r="9" fill="#22d3ee"/><text x="255" y="104" text-anchor="middle" fill="#9aa5bd" font-size="11">F1</text>
+        <circle cx="330" cy="120" r="9" fill="#22d3ee"/><text x="330" y="104" text-anchor="middle" fill="#9aa5bd" font-size="11">F2</text>
+        <path d="M330 120 C 372 132, 398 182, 412 220" stroke="#22d3ee" stroke-width="3" fill="none"/>
+        <circle cx="415" cy="230" r="11" fill="#ffb86b" stroke="#ffffff" stroke-width="2"/>
+        <text x="415" y="256" text-anchor="middle" fill="#ffb86b" font-size="11" font-weight="700">M</text>
+        <text x="230" y="288" text-anchor="middle" fill="#9aa5bd" font-size="12">合并提交有两个父节点 · 历史保留分叉的真实形状</text>
+        <!-- 右半：rebase -->
+        <text x="700" y="32" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">rebase：摘下重放</text>
+        <circle cx="560" cy="110" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
+        <circle cx="640" cy="110" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="600" y="86" text-anchor="middle" fill="#9aa5bd" font-size="11">旧提交（被重写丢弃）</text>
+        <path d="M640 120 C 700 148, 738 186, 756 212" stroke="#22d3ee" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+        <polygon points="760,220 750,208 746,218" fill="#22d3ee"/>
+        <line x1="520" y1="230" x2="885" y2="230" stroke="#6f6fff" stroke-width="3"/>
+        <circle cx="550" cy="230" r="9" fill="#6f6fff"/><text x="550" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C1</text>
+        <circle cx="620" cy="230" r="9" fill="#6f6fff"/><text x="620" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C2</text>
+        <circle cx="690" cy="230" r="9" fill="#6f6fff"/><text x="690" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
+        <circle cx="760" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
+        <circle cx="760" cy="230" r="9" fill="#22d3ee"/><text x="760" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F1′ 重放</text>
+        <circle cx="840" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
+        <circle cx="840" cy="230" r="9" fill="#22d3ee"/><text x="840" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F2′ 重放</text>
+        <text x="700" y="288" text-anchor="middle" fill="#9aa5bd" font-size="12">你的提交搬到 main 顶端 · 历史变成一条直线</text>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>最常用的两个姿势</h2></div>
+    <div class="code-frame">
+      <pre><code><span class="ck"># 1) 同步主干后，把你的分支"搬"到 main 顶端</span>
+git switch feature-x
+git rebase main          <span class="ck"># 摘下你的提交，逐个重放到 main 最新处</span>
+
+<span class="ck"># 2) 整理最近 3 个提交（合并 / 改名 / 删除）</span>
+git rebase -i HEAD~3
+<span class="ck">#   pick   a1b2c3  feat: 增加传感器驱动</span>
+<span class="ck">#   squash 4d5e6f  fix: 修改变量名      ← 并入上一个提交</span>
+<span class="ck">#   reword 7g8h9i  docs: 更新注释       ← 只改提交信息</span>
+<span class="ck">#   drop   0j1k2l  chore: 临时调试      ← 直接丢弃</span>
+
+<span class="ck"># 3) 重放途中遇到冲突：改完 → 暂存 → 继续</span>
+git add . &amp;&amp; git rebase --continue
+<span class="ck"># 后悔药：git rebase --abort  一键回到 rebase 之前</span></code></pre>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>交互式指令</th><th>作用</th><th>一句话类比</th></tr></thead>
+        <tbody>
+          <tr><td><code class="il">pick</code></td><td>保留该提交（默认）</td><td>原样通过</td></tr>
+          <tr><td><code class="il">reword</code></td><td>保留提交，但修改提交信息</td><td>改简历措辞</td></tr>
+          <tr><td><code class="il">squash</code></td><td>并入上一个提交，信息合并保留</td><td>两件事并成一件</td></tr>
+          <tr><td><code class="il">fixup</code></td><td>并入上一个提交，丢弃本条信息</td><td>默默合并</td></tr>
+          <tr><td><code class="il">drop</code></td><td>直接删除该提交</td><td>这段黑历史不存在</td></tr>
+          <tr><td><code class="il">edit</code></td><td>停在该提交，方便修改内容</td><td>暂停检查</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">04</span><h2>黄金法则：别动公共历史</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>只 rebase 自己的、没推出去的分支</h3>
+        <p>rebase 会<b>重写提交历史</b>。如果对已经 push 到公共分支（如 main、共享分支）的提交做 rebase，别人 pull 下来会撞出大量重复冲突。<mark>历史一旦公开，就是团队契约——公共分支用 merge，私有分支随便 rebase。</mark></p>
+      </div>
+      <div class="card">
+        <h3>冲突处理三步（会循环出现）</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span>打开标了 <b>conflict</b> 的文件，手动改成想要的样子</span></li>
+          <li><span class="dot">2</span><span><code class="il">git add 文件名</code> 标记这个提交已解决</span></li>
+          <li><span class="dot">3</span><span><code class="il">git rebase --continue</code> 继续重放下一个</span></li>
+        </ul>
+        <p style="margin-top:10px;">rebase 是<b>一段一段重放</b>的，所以冲突可能不止出现一次——耐心循环到它说 Successfully rebased。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">05</span><h2>实战案例：一次完整的变基实录</h2></div>
+
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>想要干嘛？（真实场景）</h3>
+        <p>手上两个分支：<b>develop/machine_S115</b> 是同事维护的主开发分支，一直有新更新；<b>feature/emerge_stop_secon_recover</b> 是我的功能分支，但基于旧代码。<mark>我想继续在 feature 分支上开发，又不想丢掉 S115 的新更新</mark>——于是决定把 feature 分支变基到云端最新的 S115 上。</p>
+      </div>
+      <div class="card">
+        <h3>动手前的自查</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span>基准选<b>云端的</b> <code class="il">origin/develop/machine_S115</code>，不用先切到它——fetch 后远程镜像就是最新</span></li>
+          <li><span class="dot">2</span><span><code class="il">git status</code> 确认工作区干净，没提交的改动先 commit 或 stash</span></li>
+          <li><span class="dot">3</span><span>心里有数：完成后推送要 <b>--force-with-lease</b>（历史被重写了）</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-frame">
+      <pre><code><span class="ck"># 0) 自查：工作区必须干净</span>
+$ git status
+On branch feature/emerge_stop_secon_recover
+Your branch is up to date with 'origin/feature/emerge_stop_secon_recover'.
+nothing to commit, working tree clean
+
+<span class="ck"># 1) 一步同步云端所有分支（不用切分支、不动本地代码）</span>
+$ git fetch origin
+
+<span class="ck"># 2) 变基：把我的提交重放到云端 S115 最新处</span>
+$ git rebase origin/develop/machine_S115
+Successfully rebased and updated refs/heads/feature/emerge_stop_secon_recover.
+
+<span class="ck"># 3) 历史被重写，普通 push 会被拒——用安全强推</span>
+$ git push --force-with-lease origin feature/emerge_stop_secon_recover
+ + 2f36c33...adcf74c feature/emerge_stop_secon_recover -&gt; feature/emerge_stop_secon_recover (forced update)</code></pre>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>终端输出</th><th>怎么读它</th></tr></thead>
+        <tbody>
+          <tr><td><code class="il">nothing to commit, working tree clean</code></td><td>没有未提交改动，<b>变基前提满足</b>，可以动手</td></tr>
+          <tr><td><code class="il">git fetch origin</code> 无任何输出</td><td>正常！fetch 静默完成，所有 <code class="il">origin/xxx</code> 镜像已更新到云端最新</td></tr>
+          <tr><td><code class="il">Successfully rebased and updated ...</code></td><td>一次成功、<b>零冲突</b>——历史已重写成"一条直线"</td></tr>
+          <tr><td><code class="il">+ 2f36c33...adcf74c ... (forced update)</code></td><td>强推成功，<code class="il">+</code> 和 <code class="il">forced update</code> 表明云端指针被移到新历史上</td></tr>
+          <tr><td><code class="il">remote: Create pull request ...</code></td><td>Bitbucket 主动给出 PR 链接——合并回 S115 时点它走正常审查</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid g-2">
+      <div class="card">
+        <h3>为什么用 --force-with-lease 而不是 --force？</h3>
+        <p><code class="il">--force</code> 是无脑覆盖：云端有别人的新提交也会被抹掉。<mark>--force-with-lease 会先检查"云端还是我上次看到的那个版本吗"，不是就拒绝推送</mark>——本次变基后云端 feature 分支只有我自己在用，所以它能安全通过。</p>
+      </div>
+      <div class="card">
+        <h3>收尾必做：编译验证</h3>
+        <p>变基后的代码是"最新基底 + 我的改动"的混合体，<b>接口变更、宏被删</b>这类问题只有编译能暴露。本次案例最后一步：立刻编译一遍固件确认通过，再点 remote 给出的 PR 链接发起合并请求。</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /Git Rebase 面板 -->
+
+  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase · 顶部可切换主题</footer>
 
 </div>
 
