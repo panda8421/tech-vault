@@ -161,6 +161,7 @@
     <button class="tab-btn" data-tab="wpa" role="tab" aria-selected="false"><span class="chip">Wi-Fi</span> WPA2 加密</button>
     <button class="tab-btn" data-tab="git" role="tab" aria-selected="false"><span class="chip">Git</span> Rebase 使用</button>
     <button class="tab-btn" data-tab="ble" role="tab" aria-selected="false"><span class="chip">BLE</span> NimBLE 蓝牙</button>
+    <button class="tab-btn" data-tab="tty" role="tab" aria-selected="false"><span class="chip">TTY</span> 终端回环</button>
   </div>
 
   <!-- 面板一：PPS 授时 -->
@@ -1374,7 +1375,151 @@ static int chr_write_cb(uint16_t conn, uint16_t attr,
 
   </div><!-- /NimBLE 面板 -->
 
-  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 · 顶部可切换主题</footer>
+  <!-- 面板六：终端回环 / 转义序列注入 -->
+  <div class="panel" id="tab-tty" data-panel="tty">
+
+  <header>
+    <span class="eyebrow">串口调试与终端科普</span>
+    <h1>终端回环：为什么我的调试日志会"替我敲命令"？</h1>
+    <p class="sub">命令行里长出了我从没敲过的字符——这不是硬件故障，是"输出→输入"的一条回环</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>现象：一次真实的"灵异"故障</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>命令行里长出了我没敲过的字</h3>
+        <p>嵌入式联调时，串口控制台突然被一串重复的 <code class="il">xterm-256color</code> 污染，命令根本敲不完：</p>
+        <p style="font-family:var(--mono);font-size:13px;color:#ffb86b;word-break:break-all;">esp32c61&gt; lo<mark>xterm-256color</mark>ra<mark>_xterm-256color</mark>xterm-256color...</p>
+        <p><code class="il">lo</code> 加 <code class="il">ra_</code> 正是我想敲的 <code class="il">lora_</code>——<b>我的按键和垃圾串交错出现</b>。<mark>不是硬件坏了、也不是串口噪声：是我自己的调试日志，把终端模拟器的"回答"引回了设备。</mark></p>
+      </div>
+      <div class="card">
+        <h3>先分清三条通道</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>电台 ↔ 设备</b>：Radio UART，RTCM 二进制数据走这条</span></li>
+          <li><span class="dot">2</span><span><b>设备 ↔ PC</b>：Console UART——<b>日志外出和你的按键进入共用同一根线</b></span></li>
+          <li><span class="dot">3</span><span><b>PC 终端程序 ↔ 上位机应用</b>：PTY / stdin / stdout</span></li>
+        </ul>
+        <p style="margin-top:10px;">回环发生在 ②③ 之间：<b>同一根串口的"出"和"入"是连通的</b>。这是后面一切混乱的前提。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>五跳机制：ESC 是怎么跑一个来回的</h2></div>
+    <div class="card">
+      <svg viewBox="0 0 920 350" style="width:100%;height:auto;display:block;" role="img" aria-label="终端回环五跳机制图">
+        <text x="460" y="24" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">输出 → 输入：一条回环，让终端的"回答"变成你的按键</text>
+
+        <rect x="40" y="120" width="240" height="120" rx="12" fill="var(--surface-muted)" stroke="#6f6fff" stroke-width="2"/>
+        <text x="160" y="152" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">ESP32 设备</text>
+        <text x="160" y="176" text-anchor="middle" fill="#9aa5bd" font-size="11">esp_console</text>
+        <text x="160" y="196" text-anchor="middle" fill="#9aa5bd" font-size="11">+ Console UART</text>
+        <text x="160" y="222" text-anchor="middle" fill="#ff7ab6" font-size="11">⑤ 当成按键吃下</text>
+
+        <rect x="640" y="120" width="240" height="120" rx="12" fill="var(--surface-muted)" stroke="#22d3ee" stroke-width="2"/>
+        <text x="760" y="152" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">PC 侧 MobaXterm</text>
+        <text x="760" y="176" text-anchor="middle" fill="#9aa5bd" font-size="11">终端模拟器</text>
+        <text x="760" y="196" text-anchor="middle" fill="#9aa5bd" font-size="11">（只有它知道屏幕坐标）</text>
+        <text x="760" y="222" text-anchor="middle" fill="#22d3ee" font-size="11">② 解析成"查询" ③ 自动应答</text>
+
+        <line x1="290" y1="150" x2="630" y2="150" stroke="#ffb86b" stroke-width="3"/>
+        <polygon points="630,150 616,143 616,157" fill="#ffb86b"/>
+        <text x="460" y="138" text-anchor="middle" fill="#ffb86b" font-size="12">① 日志出方向：RTCM 二进制原样打印，字节里混着 ESC(0x1B)</text>
+
+        <line x1="630" y1="212" x2="290" y2="212" stroke="#ff7ab6" stroke-width="3"/>
+        <polygon points="290,212 304,205 304,219" fill="#ff7ab6"/>
+        <text x="460" y="234" text-anchor="middle" fill="#ff7ab6" font-size="12">④ 回程：应答写进 stdin → SSH → monitor → 串口 TX → 设备 RX</text>
+
+        <text x="460" y="290" text-anchor="middle" fill="#9aa5bd" font-size="12">结果：你的命令行里出现了 xterm-256color——你从没敲过这些字符</text>
+        <text x="460" y="316" text-anchor="middle" fill="#7ee787" font-size="12">关键条件：必须"有数据流在跑"，ESC 才会被日志连续送到终端</text>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>怎么实锤？一分钟注入实验</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>假设</h3>
+        <p>如果"终端会把 ESC 序列当成查询并自动回答、回答又流回设备"这个机制成立，那么在设备端<b>主动发一条查询</b>，我们就应该收到终端的回答。</p>
+      </div>
+      <div class="card">
+        <h3>实验</h3>
+        <p>让设备问终端"光标在哪"——DSR（Device Status Report）查询 <code class="il">ESC[6n</code>，按终端规范<b>必须回答</b>光标位置。</p>
+      </div>
+    </div>
+    <div class="code-frame">
+      <pre><code>printf("\x1b[6n");   <span class="ck">/* DSR 查询：终端应自动应答光标位置 */</span></code></pre>
+    </div>
+    <div class="code-frame">
+      <pre><code>esp32c61&gt; esc_test
+(DSR query sent. ...)
+esp32c61&gt;
+esp32c61&gt; [4;261R
+Unrecognized command
+esp32c61&gt; esc_test
+esp32c61&gt; [28;261R
+Unrecognized command</code></pre>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>证据</th><th>它证明了什么</th></tr></thead>
+        <tbody>
+          <tr><td><code class="il">[4;261R</code> / <code class="il">[28;261R</code> 回到设备</td><td>终端<b>确实</b>自动应答了，而且这条应答走到了设备</td></tr>
+          <tr><td><code class="il">4</code>、<code class="il">261</code> 是<b>屏幕坐标</b>（第 4/28 行、第 261 列）</td><td>应答者只能是<b>终端模拟器</b>——SSH/bash/monitor 都不知道屏幕坐标</td></tr>
+          <tr><td><code class="il">Unrecognized command</code></td><td>esp_console <b>确实</b>把回灌的字节当成用户命令吃下了</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <p><b>为什么按键盘 Esc 键不会出垃圾？</b>键盘 Esc 是<b>出方向</b>的孤立字节（用户 → 设备），终端模拟器根本不解析它；而 RTCM 二进制是<b>入方向</b>到达终端的连续字节流，长时间跑下去，凑出一条完整查询序列是必然事件。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">04</span><h2>关键区分：命令类 vs 查询类</h2></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>序列类型</th><th>例子</th><th>终端行为</th><th>会回灌污染吗</th></tr></thead>
+        <tbody>
+          <tr><td><b>命令类</b></td><td>SGR 颜色 <code class="il">ESC[...m</code>、清屏 <code class="il">ESC[2J</code></td><td>只执行，<b>不回答</b></td><td style="color:#7ee787;">不会</td></tr>
+          <tr><td><b>查询类</b></td><td>DSR <code class="il">ESC[6n</code>、DA1 <code class="il">ESC[c</code>、DA2 <code class="il">ESC[&gt;c</code>、XTVERSION <code class="il">ESC[&gt;q</code></td><td><b>必须回答</b>，应答写进 stdin</td><td style="color:#ffb86b;">会</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <p>所以修复原则不是笼统的"别打印二进制"，而是：<mark><b>在设备输出侧剥离 0x1B（ESC）</b></mark>——它是所有转义序列的唯一入口。只要 ESC 进不了终端，终端就没有"可回答的问题"。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">05</span><h2>修复三档 + 一个安全视角</h2></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>档位</th><th>做法</th><th>效果</th></tr></thead>
+        <tbody>
+          <tr><td>最低</td><td>sanitize：非可打印 ASCII 一律替换为 <code class="il">.</code></td><td>断掉 ESC 源头，够用</td></tr>
+          <tr><td>更好</td><td>直接 <b>hex dump</b></td><td>断源头 + 保留二进制可读性，利于协议排查</td></tr>
+          <tr><td style="color:#7ee787;">最彻底</td><td>持续数据流<b>限流/按需打印</b>；或关闭 monitor 的 stdin→串口转发；或<b>日志与命令分用两个物理串口</b></td><td>从结构上断开回环，不再依赖"记得 sanitize"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card hot">
+        <h3>它不只是"显示难看"</h3>
+        <p>这类机制在安全领域有正式名字：<b>终端转义序列注入（terminal escape sequence injection）</b>。任何被打印到终端的<b>不可信字节</b>——设备日志、对端协议数据、远程文件内容——都可能回灌成伪造的"用户输入"。在串口控制台上，这等价于有人替你敲命令。</p>
+      </div>
+      <div class="card">
+        <h3>一句话记忆</h3>
+        <p><b>"日志的出口"和"按键的入口"如果共用一条串口，那么任何含 ESC 的打印都会让终端替你说话。</b>修日志只是治标，让两者分开才是治本。</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /终端回环 面板 -->
+
+  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 ｜ 终端回环 · 顶部可切换主题</footer>
 
 </div>
 
