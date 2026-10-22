@@ -1454,7 +1454,7 @@ static int chr_write_cb(uint16_t conn, uint16_t attr,
     </div>
     <div class="code-frame">
       <pre><code>esp32c61&gt; esc_test
-(DSR query sent. ...)
+I (xxxx) esc_test: DSR query sent (ESC[6n)
 esp32c61&gt;
 esp32c61&gt; [4;261R
 Unrecognized command
@@ -1473,7 +1473,30 @@ Unrecognized command</code></pre>
       </table>
     </div>
     <div class="card" style="margin-top:16px;">
-      <p><b>为什么按键盘 Esc 键不会出垃圾？</b>键盘 Esc 是<b>出方向</b>的孤立字节（用户 → 设备），终端模拟器根本不解析它；而 RTCM 二进制是<b>入方向</b>到达终端的连续字节流，长时间跑下去，凑出一条完整查询序列是必然事件。</p>
+      <p><b>为什么按键盘 Esc 键不会出垃圾？</b>键盘 Esc 是<b>出方向</b>的孤立字节（用户 → 设备），终端模拟器只负责转发、<b>不会把它当成指令解析</b>；而 RTCM 的原始字节是被 <code class="il">%s</code> <b>带进了日志文本</b>，从这个方向进入终端时，终端<b>必须解析</b>其中的 ESC 序列。数据流持续足够久，凑出一条完整查询序列<b>几乎是必然</b>——不是严格的"必然"，但概率会随时间快速累积到接近 1。</p>
+    </div>
+
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>边界说明：实锤的是"通路"，不是"真凶序列"</h3>
+        <p>DSR 实验证明的是<b>通路成立</b>：终端会应答、应答会回到设备。修复方案（剥离 ESC）对所有序列一视同仁，所以这已经够了。</p>
+        <p style="margin-top:8px;">但它<b>没有</b>定位到"RTCM 里究竟是哪条序列吐出了 <code class="il">xterm-256color</code>"——那是另一个问题，也不影响修复。想钉死真凶，可以再试几条<b>查询类</b>序列：DA1 <code class="il">ESC[c</code>、DA2 <code class="il">ESC[&gt;c</code>、XTVERSION <code class="il">ESC[&gt;q</code>。其中版本查询最可能返回<b>带终端名字</b>的应答（这是待验证的假设，不是结论）。</p>
+      </div>
+      <div class="card">
+        <h3>再把证据升到"字节级"</h3>
+        <p>屏幕上看到的 <code class="il">[4;261R</code>，前导 ESC 已经被终端吃掉了。若把接收侧改成 hex 打印，就能看到设备<b>实际收到</b>的原始字节：</p>
+        <div class="code-frame" style="margin-top:12px;">
+          <pre><code>1B 5B 34 3B 32 36 31 52    .[4;261R
+│  │  │  │  │  │  │  │
+ESC [  4  ;  2  6  1  R</code></pre>
+        </div>
+        <p style="margin-top:10px;">一个不多、一个不少——这比"屏幕显示"更硬，也是 hex dump 比 sanitize 更适合排查的原因。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>为什么垃圾串是"重复的同一串"？</h3>
+      <p>因为 <b>RTCM 报文是周期性重复的</b>（同类消息每帧内容高度相似）。一旦某个字节位置凑巧形成了查询序列，它会在<b>每个帧周期的同一偏移位置反复出现</b>——终端就一遍又一遍回同一个答案，而不是吐随机乱码。这也反过来支持了"时间够长几乎必然"：对周期性数据而言，第一次命中之后就会规律性复现。</p>
     </div>
   </section>
 
