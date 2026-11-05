@@ -1320,16 +1320,67 @@ $ git push --force-with-lease origin feature/emerge_stop_secon_recover
 
   <section>
     <div class="section-title"><span class="section-index">04</span><h2>数据怎么流：GATT "数据表格"模型</h2></div>
-    <div class="code-frame">
-      <pre><code>ESP32（外设 Peripheral）
- └── Service 服务（UUID 标识，比如"环境传感器服务"）
-      └── Characteristic 特征值（真正的数据格子）
-           ├── Read   读     → 手机读 ESP32 的数据
-           ├── Write  写     → 手机发数据给 ESP32   ← 你用的就是这个
-           └── Notify 通知  → ESP32 主动推数据给手机</code></pre>
-    </div>
-    <div class="card" style="margin-top:16px;">
-      <p>手机"写数据"的那一瞬间，NimBLE 会调用你提前注册好的<b>写回调函数</b>，把 <code class="il">(连接句柄, 属性句柄, 数据指针, 长度)</code> 递给你——你只管处理内容，传输细节一概不用操心。</p>
+    <div class="figure-frame">
+      <svg viewBox="0 0 920 385" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GATT 数据表格模型与写回调链路">
+        <defs>
+          <marker id="bleArrM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#9aa5bd"/>
+          </marker>
+          <marker id="bleArrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#27d2bf"/>
+          </marker>
+          <marker id="bleArrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#6f6fff"/>
+          </marker>
+        </defs>
+
+        <!-- 手机（Central） -->
+        <rect x="30" y="55" width="150" height="210" rx="14" fill="#1b2233" stroke="#22a5f7" stroke-width="1.5"/>
+        <rect x="45" y="70" width="120" height="130" rx="8" fill="#0d1117" stroke="rgba(255,255,255,0.10)"/>
+        <text x="105" y="141" text-anchor="middle" fill="#22a5f7" font-size="15" font-weight="700" font-family="monospace">BLE</text>
+        <text x="105" y="228" text-anchor="middle" fill="#e8ecf4" font-size="15" font-weight="700">手机</text>
+        <text x="105" y="247" text-anchor="middle" fill="#9aa5bd" font-size="10">Central 主机</text>
+
+        <!-- ESP32（Peripheral）：Service 套 Characteristic -->
+        <rect x="690" y="40" width="200" height="228" rx="14" fill="#1b2233" stroke="#27d2bf" stroke-width="1.5"/>
+        <text x="790" y="60" text-anchor="middle" fill="#e8ecf4" font-size="13" font-weight="700">ESP32（外设 Peripheral）</text>
+        <rect x="706" y="72" width="168" height="182" rx="10" fill="rgba(111,111,255,0.10)" stroke="#6f6fff"/>
+        <text x="790" y="92" text-anchor="middle" fill="#aab4ff" font-size="12" font-weight="650">Service 服务</text>
+        <text x="790" y="106" text-anchor="middle" fill="#9aa5bd" font-size="10">UUID 标识</text>
+        <rect x="718" y="114" width="144" height="130" rx="8" fill="rgba(39,210,191,0.10)" stroke="#27d2bf"/>
+        <text x="790" y="133" text-anchor="middle" fill="#7fe8dc" font-size="11" font-weight="650">Characteristic</text>
+        <text x="790" y="148" text-anchor="middle" fill="#7fe8dc" font-size="11" font-weight="650">特征值</text>
+        <rect x="730" y="158" width="120" height="72" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)"/>
+        <text x="790" y="193" text-anchor="middle" fill="#e8ecf4" font-size="13" font-family="monospace">25.3 ℃</text>
+        <text x="790" y="215" text-anchor="middle" fill="#9aa5bd" font-size="9">真正的数据格子</text>
+
+        <!-- 三条通道 -->
+        <line x1="672" y1="88" x2="200" y2="88" stroke="#22a5f7" stroke-width="1.8" marker-end="url(#bleArrM)"/>
+        <text x="435" y="74" text-anchor="middle" fill="#22a5f7" font-size="12" font-weight="700">Read 读</text>
+        <text x="435" y="106" text-anchor="middle" fill="#9aa5bd" font-size="11">手机读 ESP32 的数据</text>
+
+        <line x1="198" y1="152" x2="668" y2="152" stroke="#27d2bf" stroke-width="2.4" marker-end="url(#bleArrA)"/>
+        <text x="435" y="138" text-anchor="middle" fill="#27d2bf" font-size="12" font-weight="700">Write 写 ← 你用的就是这个</text>
+        <text x="435" y="172" text-anchor="middle" fill="#9aa5bd" font-size="11">手机发数据给 ESP32</text>
+
+        <line x1="672" y1="222" x2="200" y2="222" stroke="#6f6fff" stroke-width="1.8" marker-end="url(#bleArrP)"/>
+        <text x="435" y="208" text-anchor="middle" fill="#aab4ff" font-size="12" font-weight="700">Notify 通知</text>
+        <text x="435" y="242" text-anchor="middle" fill="#9aa5bd" font-size="11">ESP32 主动推数据给手机</text>
+
+        <!-- 写回调瞬间 -->
+        <text x="460" y="290" text-anchor="middle" fill="#9aa5bd" font-size="12">手机 Write 的那一瞬间：</text>
+        <rect x="70" y="305" width="100" height="45" rx="8" fill="rgba(34,165,247,0.08)" stroke="#22a5f7"/>
+        <text x="120" y="332" text-anchor="middle" fill="#e8ecf4" font-size="12" font-weight="650">手机 Write</text>
+        <line x1="178" y1="327" x2="252" y2="327" stroke="#9aa5bd" stroke-width="1.5" marker-end="url(#bleArrM)"/>
+        <rect x="260" y="305" width="120" height="45" rx="8" fill="rgba(111,111,255,0.10)" stroke="#6f6fff"/>
+        <text x="320" y="332" text-anchor="middle" fill="#aab4ff" font-size="12" font-weight="650">NimBLE</text>
+        <line x1="388" y1="327" x2="562" y2="327" stroke="#27d2bf" stroke-width="1.8" marker-end="url(#bleArrA)"/>
+        <text x="475" y="349" text-anchor="middle" fill="#a5b4fc" font-size="10" font-family="monospace">(连接句柄, 属性句柄, 数据指针, 长度)</text>
+        <rect x="570" y="305" width="170" height="45" rx="8" fill="rgba(39,210,191,0.10)" stroke="#27d2bf"/>
+        <text x="655" y="332" text-anchor="middle" fill="#7fe8dc" font-size="12" font-weight="650">你的写回调函数</text>
+        <text x="460" y="375" text-anchor="middle" fill="#9aa5bd" font-size="11">你只管处理内容，传输细节一概不用操心</text>
+      </svg>
+      <div class="cap">GATT 模型：ESP32 里 <code>Service</code> 套 <code>Characteristic</code>（真正的数据格子），手机经 Read / Write / Notify 三条通道和它打交道</div>
     </div>
   </section>
 
