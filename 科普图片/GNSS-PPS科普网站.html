@@ -162,6 +162,7 @@
     <button class="tab-btn" data-tab="git" role="tab" aria-selected="false"><span class="chip">Git</span> Rebase 使用</button>
     <button class="tab-btn" data-tab="ble" role="tab" aria-selected="false"><span class="chip">BLE</span> NimBLE 蓝牙</button>
     <button class="tab-btn" data-tab="tty" role="tab" aria-selected="false"><span class="chip">TTY</span> 终端回环</button>
+    <button class="tab-btn" data-tab="ota" role="tab" aria-selected="false"><span class="chip">AWS</span> Jobs OTA</button>
   </div>
 
   <!-- 面板一：PPS 授时 -->
@@ -1073,35 +1074,46 @@ cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
     <div class="section-title"><span class="section-index">02</span><h2>一张图看懂：merge vs rebase</h2></div>
     <div class="card">
       <svg viewBox="0 0 920 320" style="width:100%;height:auto;display:block;" role="img" aria-label="merge 与 rebase 对比图">
+        <defs>
+          <marker id="gitArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#22d3ee"/>
+          </marker>
+        </defs>
         <!-- 左半：merge -->
         <text x="230" y="32" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">merge：原地汇合</text>
-        <line x1="50" y1="230" x2="425" y2="230" stroke="#6f6fff" stroke-width="3"/>
+        <line x1="50" y1="230" x2="435" y2="230" stroke="#6f6fff" stroke-width="3"/>
         <circle cx="80" cy="230" r="9" fill="#6f6fff"/><text x="80" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C1</text>
         <circle cx="170" cy="230" r="9" fill="#6f6fff"/><text x="170" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C2</text>
-        <circle cx="330" cy="230" r="9" fill="#6f6fff"/><text x="330" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
+        <circle cx="370" cy="230" r="9" fill="#6f6fff"/><text x="370" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
         <path d="M170 230 C 200 165, 212 132, 245 120" stroke="#22d3ee" stroke-width="3" fill="none"/>
-        <line x1="245" y1="120" x2="330" y2="120" stroke="#22d3ee" stroke-width="3"/>
+        <line x1="264" y1="120" x2="321" y2="120" stroke="#22d3ee" stroke-width="3"/>
         <circle cx="255" cy="120" r="9" fill="#22d3ee"/><text x="255" y="104" text-anchor="middle" fill="#9aa5bd" font-size="11">F1</text>
         <circle cx="330" cy="120" r="9" fill="#22d3ee"/><text x="330" y="104" text-anchor="middle" fill="#9aa5bd" font-size="11">F2</text>
-        <path d="M330 120 C 372 132, 398 182, 412 220" stroke="#22d3ee" stroke-width="3" fill="none"/>
-        <circle cx="415" cy="230" r="11" fill="#ffb86b" stroke="#ffffff" stroke-width="2"/>
-        <text x="415" y="256" text-anchor="middle" fill="#ffb86b" font-size="11" font-weight="700">M</text>
+        <path d="M330 120 C 372 132, 400 182, 411 221" stroke="#22d3ee" stroke-width="3" fill="none"/>
+        <circle cx="420" cy="230" r="11" fill="#ffb86b" stroke="#ffffff" stroke-width="2"/>
+        <text x="420" y="256" text-anchor="middle" fill="#ffb86b" font-size="11" font-weight="700">M</text>
         <text x="230" y="288" text-anchor="middle" fill="#9aa5bd" font-size="12">合并提交有两个父节点 · 历史保留分叉的真实形状</text>
         <!-- 右半：rebase -->
         <text x="700" y="32" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">rebase：摘下重放</text>
-        <circle cx="560" cy="110" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
-        <circle cx="640" cy="110" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
-        <text x="600" y="86" text-anchor="middle" fill="#9aa5bd" font-size="11">旧提交（被重写丢弃）</text>
-        <path d="M640 120 C 700 148, 738 186, 756 212" stroke="#22d3ee" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
-        <polygon points="760,220 750,208 746,218" fill="#22d3ee"/>
-        <line x1="520" y1="230" x2="885" y2="230" stroke="#6f6fff" stroke-width="3"/>
-        <circle cx="550" cy="230" r="9" fill="#6f6fff"/><text x="550" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C1</text>
-        <circle cx="620" cy="230" r="9" fill="#6f6fff"/><text x="620" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C2</text>
-        <circle cx="690" cy="230" r="9" fill="#6f6fff"/><text x="690" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
-        <circle cx="760" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
-        <circle cx="760" cy="230" r="9" fill="#22d3ee"/><text x="760" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F1′ 重放</text>
-        <circle cx="840" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
-        <circle cx="840" cy="230" r="9" fill="#22d3ee"/><text x="840" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F2′ 重放</text>
+        <text x="655" y="86" text-anchor="middle" fill="#9aa5bd" font-size="11">旧提交（被重写丢弃）</text>
+        <!-- 旧分支原先从 C2 分叉：补上这条虚线 -->
+        <path d="M600 221 L620 139" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+        <line x1="629" y1="130" x2="681" y2="130" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="620" cy="130" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="620" y="112" text-anchor="middle" fill="#9aa5bd" font-size="11">F1</text>
+        <circle cx="690" cy="130" r="9" fill="none" stroke="#9aa5bd" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="690" y="112" text-anchor="middle" fill="#9aa5bd" font-size="11">F2</text>
+        <!-- 一一对应重放：F1→F1′，F2→F2′ -->
+        <path d="M629 134 C 680 158, 712 192, 740 220" stroke="#22d3ee" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#gitArrow)"/>
+        <path d="M699 134 C 750 158, 792 192, 820 220" stroke="#22d3ee" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#gitArrow)"/>
+        <line x1="500" y1="230" x2="890" y2="230" stroke="#6f6fff" stroke-width="3"/>
+        <circle cx="530" cy="230" r="9" fill="#6f6fff"/><text x="530" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C1</text>
+        <circle cx="600" cy="230" r="9" fill="#6f6fff"/><text x="600" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C2</text>
+        <circle cx="670" cy="230" r="9" fill="#6f6fff"/><text x="670" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">C3</text>
+        <circle cx="750" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
+        <circle cx="750" cy="230" r="9" fill="#22d3ee"/><text x="750" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F1′ 重放</text>
+        <circle cx="830" cy="230" r="16" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.35"/>
+        <circle cx="830" cy="230" r="9" fill="#22d3ee"/><text x="830" y="256" text-anchor="middle" fill="#9aa5bd" font-size="11">F2′ 重放</text>
         <text x="700" y="288" text-anchor="middle" fill="#9aa5bd" font-size="12">你的提交搬到 main 顶端 · 历史变成一条直线</text>
       </svg>
     </div>
@@ -1265,7 +1277,7 @@ $ git push --force-with-lease origin feature/emerge_stop_secon_recover
         <path d="M40 60 L40 270" stroke="#6f6fff" stroke-width="2" stroke-dasharray="6 4"/>
         <polygon points="40,280 34,266 46,266" fill="#6f6fff"/>
         <text x="24" y="170" fill="#6f6fff" font-size="11" transform="rotate(-90 24 170)" text-anchor="middle">逐层接力</text>
-        <text x="460" y="316" text-anchor="middle" fill="#9aa5bd" font-size="12">NimBLE 负责中间三层的全部苦力活，你只写最上面一层</text>
+        <text x="460" y="316" text-anchor="middle" fill="#9aa5bd" font-size="12">NimBLE 负责 Host 及其以上各层的苦力活，Controller 由芯片硬件承担，你只写最上面一层</text>
       </svg>
     </div>
   </section>
@@ -1542,7 +1554,221 @@ ESC [  4  ;  2  6  1  R</code></pre>
 
   </div><!-- /终端回环 面板 -->
 
-  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 ｜ 终端回环 · 顶部可切换主题</footer>
+  <!-- 面板七：AWS Jobs OTA -->
+  <div class="panel" id="tab-ota" data-panel="ota">
+
+  <header>
+    <span class="eyebrow">AWS IoT OTA 科普</span>
+    <h1>设备"完全没反应"？——一次 Jobs OTA 的八层排障</h1>
+    <p class="sub">订阅成功、云端已发、第三方客户端也能收到——唯独设备零日志。原来问题在协议栈的"静默丢弃"</p>
+  </header>
+
+  <section>
+    <div class="section-title"><span class="section-index">01</span><h2>一句话结论</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>卡住人的不是 OTA 逻辑，而是"静默失败"</h3>
+        <p>设备订阅成功、<code class="il">start-next</code> 收到 PUBACK、云端作业状态已推进、第三方 MQTT 客户端也收到推送——<mark>唯独设备日志一行不打，仿佛消息从未存在</mark>。</p>
+        <p style="margin-top:8px;">最终根因：<b>coreMQTT 对超长入站报文执行 <code class="il">discardStoredPacket()</code>，排空整包后返回 <code class="il">MQTTNoDataAvailable</code>，<code class="il">MQTT_ProcessLoop()</code> 再把它转成 <code class="il">MQTTSuccess</code></b>——应用层看不到任何错误。项目缓冲 1024 B，而 Jobs 的 <code class="il">accepted/notify-next</code> 报文含预签名 URL，实际约 1.7 KB。</p>
+      </div>
+      <div class="card">
+        <h3>一句话方法论</h3>
+        <p><mark><b>没有日志不等于没有问题，往往意味着问题发生在日志代码之前。</b></mark>当应用层零输出时，去读协议栈源码，找"静默丢弃 / 静默降级"。</p>
+        <p style="margin-top:8px;"><b>缓冲区加大只是提高上限；真正的防线是"丢弃必须可见"。</b></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">02</span><h2>先建立 Jobs 的正确模型</h2></div>
+    <div class="card">
+      <p>Job 是云端<b>持久化任务工单</b>（<code class="il">QUEUED → IN_PROGRESS → SUCCEEDED/FAILED</code>），不是一次性消息。设备只与四个主题交互：</p>
+    </div>
+    <div class="code-frame">
+      <pre><code>订阅  $aws/things/{thing}/jobs/notify-next              云端推送"任务有变化"
+发布  $aws/things/{thing}/jobs/start-next               设备主动拉取
+订阅  $aws/things/{thing}/jobs/start-next/accepted      拉取回包（带 jobDocument）
+发布  $aws/things/{thing}/jobs/{jobId}/update           设备上报终态</code></pre>
+    </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>notify-next 只推一次</h3>
+        <p><code class="il">notify-next</code> 只在任务变化时推一次、<b>断线重连不回放</b>，所以设备每次连接都必须<b>主动发一次 <code class="il">start-next</code></b>。</p>
+      </div>
+      <div class="card">
+        <h3>accepted 是定向响应</h3>
+        <p><code class="il">accepted/rejected</code> <b>定向发给发起请求的那条连接</b>，不经过 Broker 订阅匹配——<mark>别的客户端订阅也看不到</mark>。别把它当"云端没发"的证据。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">03</span><h2>九层问题总表</h2></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>现象</th><th>真实原因</th><th>修复</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>订阅 jobs/* 后连接被断</td><td>证书 Policy 未放行保留主题</td><td>补 Subscribe/Publish/Receive</td></tr>
+          <tr><td>2</td><td>start-next 被拒 InvalidTopic</td><td>主题多写 $next 段</td><td>改为 jobs/start-next</td></tr>
+          <tr><td>3</td><td><b>订阅成功、云端已发、设备零日志</b></td><td><b>coreMQTT 静默丢弃超过 1024B 的入站包</b></td><td>网络缓冲 1024 → 4096；打开 coreMQTT error 日志</td></tr>
+          <tr><td>4</td><td>报文收到但解析 malformed</td><td>URL 缓冲 768B 装不下 1.3KB URL</td><td>JOTA_URL_MAX → 2048</td></tr>
+          <tr><td>5</td><td>HTTP_CLIENT: Out of buffer</td><td>HTTP 请求行缓冲默认 512B</td><td>buffer_size_tx = 2048</td></tr>
+          <tr><td>6</td><td>潜在崩溃</td><td>PSRAM 栈任务里写 NVS</td><td>NVS 移到内部栈任务</td></tr>
+          <tr><td>7</td><td>上电无声重启循环</td><td>旧 IDF 把控制台翻回 UART0，与 LoRa 抢串口</td><td>固定 IDF 5.5 + USB 控制台</td></tr>
+          <tr><td>8</td><td>内部 SRAM 最低仅剩 8 字节</td><td>BLE 与 WiFi 峰值并发叠加</td><td>错峰初始化 + 证书缓冲迁 PSRAM</td></tr>
+          <tr><td>9</td><td>丢弃发生后设备仍然零报错</td><td><code class="il">CONFIG_CORE_MQTT_LOG_ERROR</code> 未定义，<code class="il">LogError</code> 被编译成空宏</td><td>组件 CMakeLists 注入 <code class="il">CONFIG_CORE_MQTT_LOG_ERROR=1</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">04</span><h2>黑障：订阅成功、云端已发、设备零日志</h2></div>
+    <div class="card" style="margin-top:16px;">
+      <p>这是耗时最长的阶段。三方证据都指向"消息应该到"：发送侧 PUBACK ✓、订阅侧 SUBACK 成功 ✓、云端测试客户端能收到 ✓——可设备<b>一行日志都没有</b>。</p>
+    </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>已经被排除的</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span><b>没发出去</b>：PUBACK 收到、云端状态推进 → 排除</span></li>
+          <li><span class="dot">2</span><span><b>订阅没登记</b>：SUBACK 逐码扫描成功 → 排除</span></li>
+          <li><span class="dot">3</span><span><b>云端没发</b>：测试客户端能收到 → 排除</span></li>
+          <li><span class="dot">4</span><span><b>收到但解析失败</b>：失败路径有 ERROR，却没有 → 排除</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>决定性的对照实验</h3>
+        <p>早先 <code class="il">InvalidTopic</code> 的 <b>rejected</b> 报文（约 100 B）<b>能</b>被收到；现在的 <b>accepted</b>（约 1.7 KB）<b>收不到</b>。</p>
+        <p style="margin-top:8px;">同一主题前缀、同一策略，唯一变量是 <mark><b>报文大小</b></mark>。</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>关键观测点：把"没收到"和"收到没解析"分开</h3>
+      <div class="code-frame">
+        <pre><code><span class="ck">// 所有主题匹配之前，加无条件日志</span>
+ESP_LOGI(AWS_TAG, <span class="co">"Incoming PUBLISH: topic=%.*s len=%u qos=%d."</span>,
+         (<span class="cl">int</span>)pPublishInfo-&gt;topicNameLength,
+         (<span class="cl">const char</span> *)pPublishInfo-&gt;pTopicName,
+         (<span class="cl">unsigned</span>)pPublishInfo-&gt;payloadLength,
+         (<span class="cl">int</span>)pPublishInfo-&gt;qos);</code></pre>
+      </div>
+      <p style="margin-top:10px;">这条<b>不出现</b>，就说明问题在<b>协议栈以下</b>，而不是业务代码把消息吞了。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">05</span><h2>读协议栈源码：找到静默丢弃点</h2></div>
+    <div class="card">
+      <p>coreMQTT 有<b>两条不同的丢弃路径</b>：<code class="il">receivePacket()</code> 只用于等待 CONNACK；<b>PUBLISH 等常规入站包走 <code class="il">receiveSingleIteration()</code></b>。</p>
+    </div>
+    <div class="code-frame">
+      <pre><code><span class="ck">/* receiveSingleIteration()：主循环处理入站包的实际路径 */</span>
+<span class="cl">else if</span> ( totalMQTTPacketLength &gt; pContext-&gt;networkBuffer.<span class="co">size</span> )
+{
+    <span class="ck">/* 排空 socket 中该包剩余字节，再清空缓冲、重置 index */</span>
+    status = discardStoredPacket( pContext, &amp;incomingPacket );
+}
+
+<span class="ck">/* MQTT_ProcessLoop() 末尾：把"已丢弃"洗白成成功 */</span>
+<span class="cl">if</span> ( status == MQTTNoDataAvailable )
+{
+    status = MQTTSuccess;
+}</code></pre>
+    </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card hot">
+        <h3>四个关键点</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span>超过缓冲的报文<b>整包丢弃</b>，按剩余长度精确排空，保持字节流同步</span></li>
+          <li><span class="dot">2</span><span>返回 <code class="il">MQTTNoDataAvailable</code>，被 ProcessLoop 转成 <code class="il">MQTTSuccess</code>，<b>应用层完全无感</b></span></li>
+          <li><span class="dot">3</span><span>丢弃发生在反序列化<b>之前</b>：应用回调、业务日志、无条件回执都不会执行</span></li>
+          <li><span class="dot">4</span><span><code class="il">discardStoredPacket()</code> 内本有 <code class="il">LogError("Dumped packet")</code>，但当时那个宏被编译成空</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>为什么容易被误导</h3>
+        <ul class="points">
+          <li><span class="dot">1</span><span>小报文（拒绝原因 ~100B）能收到 → 以为收包链路是好的</span></li>
+          <li><span class="dot">2</span><span>Publish 侧正常、云端正常</span></li>
+          <li><span class="dot">3</span><span>设备零日志，连"收到但解析失败"都没有</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">06</span><h2>补记：复现静默丢弃，把最后一块日志补上</h2></div>
+    <div class="grid g-2">
+      <div class="card hot">
+        <h3>为什么连库自己的日志都没有</h3>
+        <p>coreMQTT 的日志宏是<b>编译期开关</b>：<code class="il">CONFIG_CORE_MQTT_LOG_ERROR</code> 未定义时，<code class="il">LogError</code> 会被展开成<b>空宏</b>——整条语句直接编译掉，日志字符串根本不进固件。</p>
+        <div class="code-frame" style="margin-top:12px;">
+          <pre><code><span class="ck"># 组件 CMakeLists.txt：只开 error 级，正常收发不刷屏</span>
+target_compile_definitions(${COMPONENT_LIB}
+  PRIVATE CONFIG_CORE_MQTT_LOG_ERROR=1)</code></pre>
+        </div>
+        <p style="margin-top:10px;">编译后用 <code class="il">strings</code> 确认日志字符串确实进了 ELF，才算真的打开了观测。</p>
+      </div>
+      <div class="card">
+        <h3>主动复现（缓冲临时改回 1024）</h3>
+        <div class="code-frame" style="margin-top:8px;">
+          <pre><code>I (8820) AWS_DEAL: Incoming PUBLISH: topic=...jobs/start-next/accepted len=24 qos=0.
+I (8820) AWS_DEAL: Jobs: start-next/accepted received (24 bytes).
+E (289360) coreMQTT: Dumped packet. DumpedBytes=700.</code></pre>
+        </div>
+        <p style="margin-top:10px;">连接时的空 <code class="il">accepted</code> 只有 <b>24 B</b>，正常处理并忽略；约 289 秒后云端新建 job 触发 <code class="il">notify-next</code>（约 1.7 KB），<b>超过 1024 缓冲被丢弃</b>。</p>
+        <p style="margin-top:8px;">注意：这次触发丢弃的是 <b>notify-next</b>，不是 accepted——两者都可能携带 jobDocument。</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>两个容易误读的细节</h3>
+      <ul class="points">
+        <li><span class="dot">1</span><span>PUBLISH 超长时<b>不会</b>打印 <code class="il">Incoming packet will be dumped: PacketSize=...</code>——那条属于 <code class="il">receivePacket()</code>（CONNACK 路径），PUBLISH 只会打印 <code class="il">Dumped packet</code></span></li>
+        <li><span class="dot">2</span><span><code class="il">DumpedBytes</code> 是<b>从 socket 排空的字节数</b>，不是整包大小；本例 1024 已读入 + 700 排空 ≈ 1.7 KB</span></li>
+      </ul>
+      <p style="margin-top:10px;"><mark><b>缓冲区加大只是提高上限；真正的防线是"丢弃必须可见"。</b></mark></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">07</span><h2>方法论：设备"完全没反应"时怎么查</h2></div>
+    <div class="card">
+      <ul class="points">
+        <li><span class="dot">1</span><span>先证明<b>发送侧</b>成功：PUBACK？云端状态变化？</span></li>
+        <li><span class="dot">2</span><span>再证明<b>订阅已登记</b>：SUBACK 逐码成功，不看"SUBSCRIBE sent"</span></li>
+        <li><span class="dot">3</span><span>引入<b>第三方观察点</b>：另开客户端订阅同一主题，确认云端真的在发</span></li>
+        <li><span class="dot">4</span><span>在<b>最底层加无条件回执</b>：topic + len，把"没收到"与"收到没解析"分开</span></li>
+        <li><span class="dot">5</span><span>区分<b>定向响应</b>与<b>广播响应</b>：Jobs 的 accepted 是定向的，第三方看不到</span></li>
+        <li><span class="dot">6</span><span>应用层<b>零日志</b>时去读<b>协议栈源码</b>：找静默丢弃、静默降级</span></li>
+        <li><span class="dot">7</span><span>每个假设都要能被<b>一个实验证伪</b></span></li>
+      </ul>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <p>破局关键：用 <b>100B 的 rejected 能收到 ↔ 1.7KB 的 accepted/notify-next 收不到</b>这个对照，把范围从"权限"缩小到"报文大小"。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><span class="section-index">08</span><h2>几个容易记错的反直觉结论</h2></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>场景</th><th>现象</th></tr></thead>
+        <tbody>
+          <tr><td>普通主题缺 Subscribe 权限</td><td>回 SUBACK <code class="il">0x80</code>，连接保持</td></tr>
+          <tr><td>保留主题（$aws）缺权限</td><td><b>直接断 TCP</b>，特征 mbedtls <code class="il">-0x004C</code></td></tr>
+          <tr><td>iot:Receive 被拒</td><td>订阅成功、消息<b>静默不投递</b>，无任何错误</td></tr>
+          <tr><td>coreMQTT 超长入站包</td><td><code class="il">discardStoredPacket()</code> 排空整包 → <code class="il">MQTTNoDataAvailable</code> → ProcessLoop 转成 <code class="il">MQTTSuccess</code>，应用层无感；<b>必须开 <code class="il">CONFIG_CORE_MQTT_LOG_ERROR</code></b> 才能看到 <code class="il">Dumped packet</code></td></tr>
+          <tr><td>Jobs accepted/rejected</td><td>定向发送，不经过 Broker，其它客户端订阅不到</td></tr>
+          <tr><td>notify-next</td><td>只推一次、不回放，设备必须每次主动 start-next</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  </div><!-- /Jobs OTA 面板 -->
+
+  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 ｜ 终端回环 ｜ Jobs OTA · 顶部可切换主题</footer>
 
 </div>
 
