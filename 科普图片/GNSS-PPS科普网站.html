@@ -6,7 +6,7 @@
 <title>GNSS 的 PPS 引脚是什么？| 科普</title>
 <style>
   :root{
-    --bg:#0b0e17; --surface:#141926; --surface-2:#1b2233;
+    --bg:#0b0e17; --surface:#141926; --surface-2:#1b2233; --surface-muted:#1b2233;
     --line:rgba(255,255,255,0.10); --text:#e8ecf4; --muted:#9aa5bd;
     --brand:#6f6fff; --brand-2:#22a5f7; --accent:#27d2bf;
     --font:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
@@ -142,6 +142,25 @@
   .tab-btn:hover{color:var(--text);border-color:rgba(111,111,255,.5);}
   .tab-btn.active{color:#fff;border-color:rgba(111,111,255,.55);background:linear-gradient(180deg,rgba(111,111,255,.22),rgba(111,111,255,.08));box-shadow:0 0 0 1px rgba(111,111,255,.18) inset;}
   .tab-btn .chip{font:700 11px var(--mono);color:var(--brand-2);}
+
+  /* 左侧固定导航栏（宽屏）：任何位置都能切换专栏 */
+  .side-nav{position:fixed;left:0;top:0;bottom:0;width:208px;z-index:10;display:flex;flex-direction:column;gap:8px;
+    padding:26px 16px 20px;border-right:1px solid var(--line);
+    background:rgba(11,14,23,.85);backdrop-filter:blur(10px);overflow-y:auto;}
+  .side-nav .nav-brand{font:600 13px var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+    padding:0 8px 14px;border-bottom:1px solid var(--line);margin-bottom:8px;}
+  .side-nav .nav-brand b{display:block;color:var(--accent);font-size:12px;margin-bottom:2px;letter-spacing:.2em;}
+  .side-nav .tab-btn{width:100%;justify-content:flex-start;padding:10px 12px;}
+  .side-nav .tab-btn.active{position:relative;}
+  .side-nav .tab-btn.active::before{content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--brand);}
+  .side-nav .nav-foot{margin-top:auto;padding:12px 8px 0;color:var(--muted);font-size:12px;line-height:1.6;}
+  @media(min-width:901px){
+    .tabs{display:none;}
+    .wrap{margin-left:max(232px, calc((100% - 960px)/2 + 116px));margin-right:auto;}
+  }
+  @media(max-width:900px){
+    .side-nav{display:none;}
+  }
   .panel{display:none;}
   .panel.active{display:block;animation:panelIn .3s ease;}
   @keyframes panelIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -152,9 +171,21 @@
 </style>
 </head>
 <body>
+<nav class="side-nav" role="tablist" aria-label="专栏切换（侧栏）">
+  <div class="nav-brand"><b>TECH VAULT</b>科技知识科普</div>
+  <button class="tab-btn active" data-tab="pps" role="tab" aria-selected="true"><span class="chip">GNSS</span> PPS 授时</button>
+  <button class="tab-btn" data-tab="usb" role="tab" aria-selected="false"><span class="chip">USB</span> 主机知识</button>
+  <button class="tab-btn" data-tab="wpa" role="tab" aria-selected="false"><span class="chip">Wi-Fi</span> WPA2 加密</button>
+  <button class="tab-btn" data-tab="git" role="tab" aria-selected="false"><span class="chip">Git</span> Rebase 使用</button>
+  <button class="tab-btn" data-tab="ble" role="tab" aria-selected="false"><span class="chip">BLE</span> NimBLE 蓝牙</button>
+  <button class="tab-btn" data-tab="tty" role="tab" aria-selected="false"><span class="chip">TTY</span> 终端回环</button>
+  <button class="tab-btn" data-tab="ota" role="tab" aria-selected="false"><span class="chip">AWS</span> Jobs OTA</button>
+  <div class="nav-foot">7 个专栏 · 持续更新<br>宽屏左侧切换 / 窄屏回顶部</div>
+</nav>
+
 <div class="wrap">
 
-  <!-- 顶部标签切换器 -->
+  <!-- 顶部标签切换器（窄屏显示） -->
   <div class="tabs" role="tablist" aria-label="主题切换">
     <button class="tab-btn active" data-tab="pps" role="tab" aria-selected="true"><span class="chip">GNSS</span> PPS 授时</button>
     <button class="tab-btn" data-tab="usb" role="tab" aria-selected="false"><span class="chip">USB</span> 主机知识</button>
@@ -1280,6 +1311,38 @@ $ git push --force-with-lease origin feature/emerge_stop_secon_recover
         <text x="460" y="316" text-anchor="middle" fill="#9aa5bd" font-size="12">NimBLE 负责 Host 及其以上各层的苦力活，Controller 由芯片硬件承担，你只写最上面一层</text>
       </svg>
     </div>
+    <div class="grid g-2" style="margin-top:16px;">
+      <div class="card">
+        <span class="step-num">第 1 层 · 业务</span>
+        <h3 class="step-title">你写的应用代码</h3>
+        <p class="step-body">干的就是"业务"本身：说"启动广播""收到 Write 就把数据存起来"，不碰任何通信细节。类比：<code class="mono">寄件人</code>——只管说寄给谁、寄什么。</p>
+      </div>
+      <div class="card">
+        <span class="step-num">第 2 层 · 规矩</span>
+        <h3 class="step-title">GATT / GAP 层</h3>
+        <p class="step-body">定"游戏规则"：<b>GAP</b> 管广播/连接的规矩（谁能看见我、怎么握手），<b>GATT</b> 管数据长什么样（Service 套 Characteristic 的表格）。只定义规矩，执行靠下层。类比：<code class="mono">名片 + 货架编号规则</code>。</p>
+      </div>
+      <div class="card">
+        <span class="step-num">第 3 层 · 物流</span>
+        <h3 class="step-title">主机层（Host）</h3>
+        <p class="step-body">把数据<b>打包</b>成规范格式、<b>加密</b>、<b>分片</b>（MTU 23 字节塞不下就拆）、保证送到对方对等的层。NimBLE 的本体就是这层。类比：<code class="mono">快递公司</code>——分拣打包贴单，但不认路。</p>
+      </div>
+      <div class="card">
+        <span class="step-num">第 4 层 · 路上</span>
+        <h3 class="step-title">控制器层（Controller）</h3>
+        <p class="step-body">直接指挥射频硬件：<b>跳频</b>（定期换信道躲干扰）、<b>收发电波</b>（时序精确到微秒）、维护物理链路。在 ESP32 上这层是芯片内置的蓝牙控制器。类比：<code class="mono">车队司机</code>——认路、开车、准时到达。</p>
+      </div>
+      <div class="card">
+        <span class="step-num">第 5 层 · 硬件</span>
+        <h3 class="step-title">射频硬件</h3>
+        <p class="step-body">真正的"喇叭和耳朵"：2.4GHz 天线与收发电路，把比特变成电磁波、再把电磁波变回比特。纯硬件，没有软件。</p>
+      </div>
+      <div class="card hot">
+        <span class="step-num">核心思想</span>
+        <h3 class="step-title">为什么能"只写最上面一层"？</h3>
+        <p class="step-body">你说一句"开始广播"，往下每层自动接力翻译：GAP 翻译成规范定义 → Host 打包成指令 → Controller 变成射频时序 → 天线发出电波；<b>响应回来时再逐层还原</b>。协议栈存在的意义，就是把"通信"从你的业务里整个抽走。</p>
+      </div>
+    </div>
   </section>
 
   <section>
@@ -1460,11 +1523,83 @@ static int chr_write_cb(uint16_t conn, uint16_t attr,
         <h3>先分清三条通道</h3>
         <ul class="points">
           <li><span class="dot">1</span><span><b>电台 ↔ 设备</b>：Radio UART，RTCM 二进制数据走这条</span></li>
-          <li><span class="dot">2</span><span><b>设备 ↔ PC</b>：Console UART——<b>日志外出和你的按键进入共用同一根线</b></span></li>
+          <li><span class="dot">2</span><span><b>设备 ↔ PC</b>：Console UART——日志外出和你的按键进入<b>共用同一个串口</b>（按键和终端的回答都从 RX 这条线进）</span></li>
           <li><span class="dot">3</span><span><b>PC 终端程序 ↔ 上位机应用</b>：PTY / stdin / stdout</span></li>
         </ul>
-        <p style="margin-top:10px;">回环发生在 ②③ 之间：<b>同一根串口的"出"和"入"是连通的</b>。这是后面一切混乱的前提。</p>
+        <p style="margin-top:10px;">回环发生在 ②③ 之间：<b>同一个串口的"出"和"入"是连通的</b>。这是后面一切混乱的前提。</p>
       </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <svg viewBox="0 0 920 320" style="width:100%;height:auto;display:block;" role="img" aria-label="现象拆解图：命令行是按键回显与回灌垃圾的交错">
+        <text x="460" y="24" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">现象拆解：一行命令行 = 我的按键（绿）+ 回灌的垃圾（粉），交错出现</text>
+
+        <rect x="60" y="48" width="800" height="120" rx="10" fill="#0d1117" stroke="rgba(255,255,255,0.12)"/>
+        <circle cx="86" cy="70" r="5" fill="#ff5f56"/>
+        <circle cx="106" cy="70" r="5" fill="#ffbd2e"/>
+        <circle cx="126" cy="70" r="5" fill="#27c93f"/>
+        <line x1="60" y1="86" x2="860" y2="86" stroke="#222b3d"/>
+
+        <g font-family="ui-monospace,'JetBrains Mono','SF Mono',monospace" font-size="15">
+          <text x="90" y="124" fill="#e8ecf4" font-weight="700">esp32c61&gt;</text>
+          <text x="180" y="124" fill="#7ee787" font-weight="700">lo</text>
+          <text x="198" y="124" fill="#ff7ab6">xterm-256color</text>
+          <text x="324" y="124" fill="#7ee787" font-weight="700">ra_</text>
+          <text x="351" y="124" fill="#ff7ab6">_xterm-256color</text>
+          <text x="486" y="124" fill="#ff7ab6">xterm-256color…</text>
+        </g>
+        <line x1="180" y1="138" x2="198" y2="138" stroke="#7ee787" stroke-width="3"/>
+        <line x1="324" y1="138" x2="351" y2="138" stroke="#7ee787" stroke-width="3"/>
+        <line x1="198" y1="138" x2="324" y2="138" stroke="#ff7ab6" stroke-width="3"/>
+        <line x1="351" y1="138" x2="486" y2="138" stroke="#ff7ab6" stroke-width="3"/>
+        <line x1="486" y1="138" x2="639" y2="138" stroke="#ff7ab6" stroke-width="3"/>
+
+        <rect x="90" y="192" width="14" height="14" rx="4" fill="#7ee787"/>
+        <text x="114" y="204" fill="#e8ecf4" font-size="13">绿色 = 我的按键回显：<tspan fill="#7ee787" font-weight="700">lo + ra_</tspan> 正拼成 lora_，被垃圾串打断</text>
+        <rect x="90" y="220" width="14" height="14" rx="4" fill="#ff7ab6"/>
+        <text x="114" y="232" fill="#e8ecf4" font-size="13">粉色 = 终端自动应答回灌的垃圾串——我从没敲过它，它自己"长"出来</text>
+
+        <text x="460" y="274" text-anchor="middle" fill="#9aa5bd" font-size="12">为什么垃圾串总是同一串？RTCM 报文周期性重复，终端在同一偏移处一次次回答同一条查询</text>
+        <text x="460" y="300" text-anchor="middle" fill="#7ee787" font-size="12">对照实验：电台不收数据时这一行完全干净——问题不在开发环境，在设备侧数据通路</text>
+      </svg>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <svg viewBox="0 0 920 350" style="width:100%;height:auto;display:block;" role="img" aria-label="三条通道示意图：日志出口与按键入口共用同一个串口">
+        <text x="460" y="24" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">三条通道：日志的"出口"和按键的"入口"共用同一个串口</text>
+
+        <rect x="30" y="150" width="160" height="110" rx="12" fill="var(--surface-muted)" stroke="#6f6fff" stroke-width="2"/>
+        <text x="110" y="182" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">LoRa 电台</text>
+        <text x="110" y="206" text-anchor="middle" fill="#9aa5bd" font-size="11">空中：RTCM 差分数据</text>
+        <text x="110" y="224" text-anchor="middle" fill="#9aa5bd" font-size="10">（二进制：什么字节都可能有）</text>
+        <text x="110" y="244" text-anchor="middle" fill="#a78bfa" font-size="10">代码按字符串打印 → 原样进日志</text>
+
+        <rect x="330" y="140" width="260" height="130" rx="12" fill="var(--surface-muted)" stroke="#6f6fff" stroke-width="2"/>
+        <text x="460" y="170" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">ESP32 设备</text>
+        <text x="460" y="192" text-anchor="middle" fill="#9aa5bd" font-size="11">esp_console + 一根两用的串口</text>
+        <text x="460" y="218" text-anchor="middle" fill="#ffb86b" font-size="12">TX：日志出 →</text>
+        <text x="460" y="240" text-anchor="middle" fill="#ff7ab6" font-size="12">RX：← 按键进</text>
+
+        <rect x="730" y="150" width="160" height="110" rx="12" fill="var(--surface-muted)" stroke="#22d3ee" stroke-width="2"/>
+        <text x="810" y="182" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">PC 侧链路</text>
+        <text x="810" y="206" text-anchor="middle" fill="#9aa5bd" font-size="11">SSH + idf.py monitor</text>
+        <text x="810" y="226" text-anchor="middle" fill="#22d3ee" font-size="10">③ MobaXterm（PTY/stdin）</text>
+
+        <line x1="190" y1="205" x2="322" y2="205" stroke="#a78bfa" stroke-width="3"/>
+        <polygon points="322,205 308,198 308,212" fill="#a78bfa"/>
+        <text x="260" y="192" text-anchor="middle" fill="#a78bfa" font-size="12">① Radio UART</text>
+        <text x="260" y="224" text-anchor="middle" fill="#a78bfa" font-size="10">RTCM 二进制</text>
+
+        <line x1="598" y1="205" x2="722" y2="205" stroke="#ffb86b" stroke-width="3"/>
+        <polygon points="722,205 708,198 708,212" fill="#ffb86b"/>
+        <text x="660" y="192" text-anchor="middle" fill="#ffb86b" font-size="12">② 日志 TX →</text>
+
+        <line x1="722" y1="245" x2="598" y2="245" stroke="#ff7ab6" stroke-width="3"/>
+        <polygon points="598,245 612,238 612,252" fill="#ff7ab6"/>
+        <text x="660" y="264" text-anchor="middle" fill="#ff7ab6" font-size="12">② 按键 RX ←</text>
+        <text x="660" y="228" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">同一个串口！</text>
+
+        <text x="460" y="308" text-anchor="middle" fill="#ff7ab6" font-size="12">回环发生在 ②③ 之间：同一个串口的"出"和"入"是连通的——这是后面一切混乱的前提</text>
+        <text x="460" y="334" text-anchor="middle" fill="#7ee787" font-size="12">对照实验：不收数据时命令行干净——问题不在开发环境，而在设备侧数据通路</text>
+      </svg>
     </div>
   </section>
 
@@ -1819,7 +1954,7 @@ E (289360) coreMQTT: Dumped packet. DumpedBytes=700.</code></pre>
 
   </div><!-- /Jobs OTA 面板 -->
 
-  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 ｜ 终端回环 ｜ Jobs OTA · 顶部可切换主题</footer>
+  <footer>科技知识科普 · GNSS PPS 授时 ｜ USB 主机知识 ｜ WPA2 加密 ｜ Git Rebase ｜ NimBLE 蓝牙 ｜ 终端回环 ｜ Jobs OTA · 左侧（宽屏）/ 顶部（窄屏）可切换专栏</footer>
 
 </div>
 
@@ -1830,6 +1965,7 @@ E (289360) coreMQTT: Dumped packet. DumpedBytes=700.</code></pre>
     function activate(name){
       tabs.forEach(function(b){ var on = b.getAttribute('data-tab') === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
       panels.forEach(function(p){ var on = p.getAttribute('data-panel') === name; p.classList.toggle('active', on); });
+      window.scrollTo(0, 0);
     }
     tabs.forEach(function(b){
       b.addEventListener('click', function(){ activate(b.getAttribute('data-tab')); });
